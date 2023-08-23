@@ -1,0 +1,6 @@
+---
+- hosts: frps
+  become: yes
+  roles:
+    - role: frp
+      frp: frps

@@ -1,0 +1,24 @@
+---
+spring:
+  security:
+    user:
+      name: "admin"
+      password: "{{dashboard_admin_passwd}}"
+
+--- #################### Spring Boot Admin服务端的相关配置 ####################
+spring:
+  boot:
+    admin:
+      # Spring Boot Admin Server 服务端的相关配置
+      context-path: /admin-boot
+      # Spring Boot Admin Client 客户端的相关配置
+      client:
+        #以ip注册到admin server上，默认false使用hostname注册
+        instance:
+          service-host-type: IP # 注册实例时，优先使用 IP [IP, HOST_NAME, CANONICAL_HOST_NAME]
+          prefer-ip: true
+          metadata:
+            user.name: ${spring.security.user.name}
+            user.password: ${spring.security.user.password}
+        username: ${spring.security.user.name}
+        password: ${spring.security.user.password}

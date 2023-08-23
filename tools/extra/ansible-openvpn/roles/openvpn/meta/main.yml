@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  role_name: openvpn
+  namespace: kyl191
+  author: Kyle Lexmond
+  description: OpenVPN playbook for CentOS/Fedora/RHEL/RHEL clones & Ubuntu/Debian
+
+  license: MIT
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: EL
+      versions:
+        - 7
+        - 8
+    - name: Fedora
+      versions:
+        - 32
+        - 33
+        - 34
+    - name: Ubuntu
+      versions:
+        - trusty
+  galaxy_tags:
+    - networking
+dependencies: []

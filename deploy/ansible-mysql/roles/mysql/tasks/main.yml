@@ -1,0 +1,16 @@
+---
+- name: Check if mysql file exists
+  stat:
+    path: "/usr/bin/mysql"
+  register: mysql_file_check
+
+- include_tasks: mysql_install.yml
+  when: not mysql_file_check.stat.exists
+
+- name: Check if mysql data exists
+  stat:
+    path: "{{mysql_dbfile_path}}"
+  register: mysql_data_check
+
+- include_tasks: mysql_initialize.yml
+  when: not mysql_data_check.stat.exists

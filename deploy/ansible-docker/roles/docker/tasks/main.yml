@@ -1,0 +1,14 @@
+---
+- include_tasks: docker.yml
+
+- name: "docker login {{docker_repo_addr}}"
+  shell: "docker login -u {{docker_repo_user}} -p {{docker_repo_passwd}} {{docker_repo_addr}}"
+  when: docker_repo_passwd is defined
+  ignore_errors: true
+  register: docker_login_result
+
+- name: "show docker login result"
+  debug:
+    msg: "{{docker_login_result.stdout}}"
+  when: docker_repo_passwd is defined
+  ignore_errors: true

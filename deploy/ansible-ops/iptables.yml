@@ -1,0 +1,7 @@
+# dmesg -w 可滚动查看拦截日志
+---
+- name: install firewall/iptables
+  hosts: all
+  become: yes
+  roles:
+    - role: iptables

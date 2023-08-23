@@ -1,0 +1,6 @@
+---
+registry_version: "2"
+registry_dir: "/tool/registry"
+
+registry_port: "5000"
+

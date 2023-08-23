@@ -1,0 +1,10 @@
+---
+- name: "copy {{package_dir}} files"
+  copy:
+    src: "{{ file }}"
+    dest: "{{apps_openresty_dir}}/{{package_dir}}/{{ file | basename }}"
+    mode: 0755
+  with_fileglob:
+    - "{{package_dir}}/*"
+  loop_control:
+    loop_var: file

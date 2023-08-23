@@ -1,0 +1,6 @@
+---
+- name: install loki
+  hosts: loki
+  become: yes
+  roles:
+    - role: loki

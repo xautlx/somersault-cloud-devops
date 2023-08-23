@@ -1,0 +1,4 @@
+node_exporter_version:  1.4.1
+
+# 本地文件模式
+node_exporter_download_url: node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}.tar.gz

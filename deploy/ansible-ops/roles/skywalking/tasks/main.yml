@@ -1,0 +1,31 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{skywalking_dir}}"
+
+- name: copy docker files
+  template:
+    src: "{{ item }}"
+    dest: "{{skywalking_dir}}/{{ item }}"
+  loop:
+    - docker-compose.yml
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{skywalking_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{skywalking_dir}}"

@@ -1,0 +1,53 @@
+---
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "/etc/keepalived/conf.d"
+
+- name: Get keepalived_master_ip from hosts config
+  set_fact:
+    keepalived_master_ip: "{{hostvars[item]['ansible_ssh_host']}}"
+    openresty_keepalived_vip: "{{hostvars[item]['openresty_keepalived_vip']}}"
+  when:
+    - hostvars[item]['openresty_keepalived_vip'] is defined
+  with_items: "{{groups['apps_openresty']}}"
+
+- name: show keepalived_master_ip
+  debug:
+    msg: "{{keepalived_master_ip}}"
+  when: inventory_hostname == groups['apps_openresty'][0]
+
+# copy 主配置文件
+- name: copy configuration
+  template:
+    src: keepalived.conf
+    dest: /etc/keepalived/keepalived.conf
+
+# copy 业务配置文件
+- name: copy conf.d configuration
+  template:
+    src: "{{item}}"
+    dest: "/etc/keepalived/conf.d/{{ item | basename }}"
+  with_fileglob:
+    - "templates/conf.d/*.conf"
+
+- name: copy shell files
+  template:
+    src: "{{item}}"
+    dest: "/etc/keepalived/conf.d/{{ item | basename }}"
+    mode: "0764"
+  with_fileglob:
+    - "templates/conf.d/*.sh"
+
+- name: pkill keepalived
+  command: "pkill keepalived"
+  failed_when: false
+
+- name: Ensure keepalived is started and enabled on boot.
+  service:
+    name: "keepalived"
+    state: restarted
+    enabled: "true"

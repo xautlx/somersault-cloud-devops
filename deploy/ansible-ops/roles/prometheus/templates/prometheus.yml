@@ -1,0 +1,76 @@
+# 全局配置
+global:
+  # 默认情况下抓取目标的频率，默认1m
+  scrape_interval: 60s
+  # 抓取超时时间，默认10s
+  scrape_timeout: 10s
+  # 评估规则的频率，默认1m
+  evaluation_interval: 60s
+
+# 告警配置
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: [ '{{alertmanager_host}}:{{alertmanager_port}}' ]
+
+# 加载一次规则，并根据全局“评估间隔”定期评估它们。
+rule_files:
+  - "/etc/prometheus/rules/node-rules.yml"
+
+# 控制Prometheus监视哪些资源
+# 默认配置中，有一个名为prometheus的作业，它会收集Prometheus服务器公开的时间序列数据。
+scrape_configs:
+  # 作业名称将作为标签“job=<job_name>`添加到此配置中获取的任何数据。
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets:
+{% for item in groups['prometheus'] %}
+          - {{ hostvars[item]['ansible_ssh_host']}}:{{ hostvars[item]['prometheus_port']}}
+{% endfor %}
+
+  - job_name: 'node'
+    static_configs:
+      # Grafana Dashboard ID：11074
+      - targets:
+{% for item in groups['all'] %}
+          - {{ hostvars[item]['ansible_ssh_host']}}:9100
+{% endfor %}
+        labels:
+          role: node
+
+  - job_name: mysql
+    static_configs:
+      # Grafana Dashboard ID：7362
+      - targets:
+          # All mysql hostnames or unix sockets to monitor.
+{% for item in groups['mysql'] %}
+          - {{ hostvars[item]['ansible_ssh_host']}}:{{ hostvars[item]['mysql_prom_exporter_port']}}
+{% endfor %}
+
+  - job_name: 'redis'
+    static_configs:
+      # Grafana Dashboard ID：763
+      - targets:
+{% for item in groups['redis'] %}
+          - {{ hostvars[item]['ansible_ssh_host']}}:{{ hostvars[item]['redis_exporter_port']}}
+{% endfor %}
+
+#  - job_name: 'nginx'
+#    static_configs:
+#      - targets: [ '192.168.3.201:9113','192.168.3.202:9113','192.168.3.203:9113' ]
+#        # Grafana Dashboard ID： 12708
+#        labels:
+#          status: stub
+#      - targets: [ '192.168.3.201:9913','192.168.3.202:9913','192.168.3.203:9913' ]
+#        # Grafana Dashboard ID： 2949
+#        labels:
+#          status: vts
+
+  - job_name: 'java'
+    metrics_path: '/actuator/prometheus'
+    file_sd_configs:
+      # Grafana Dashboard ID： 4701, 11378
+      - files:
+          - /etc/prometheus/file_sd_configs/microservice/*.json         #采集文件路径
+        refresh_interval: 5m #自动发现间隔时间，默认5m

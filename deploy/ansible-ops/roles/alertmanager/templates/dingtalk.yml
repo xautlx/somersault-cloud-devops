@@ -1,0 +1,6 @@
+targets:
+  webhook:
+    url: https://oapi.dingtalk.com/robot/send?access_token={{dingtalk_webhook_token}}
+    secret: SEC91f4a610958b598f5e27738e7dce9f9e8721953e060fe10ec6be4f61fcd87342
+    mention:
+      all: true

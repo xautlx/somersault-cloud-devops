@@ -1,0 +1,5 @@
+- hosts: apps_microservice
+  become: yes
+  serial: 49%
+  roles:
+    - role: microservice

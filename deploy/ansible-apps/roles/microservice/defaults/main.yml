@@ -1,0 +1,68 @@
+---
+apps_microservice_dir: "/data/microservice"
+apps_nacos_config_dir: "{{apps_microservice_dir}}/nacos"
+prometheus_file_sd_configs_temp: "/tmp/file_sd_configs"
+
+gateway_port: 48080
+
+microservices:
+  - { name: "somersault-cloud-system",
+      service_id: "system-server",
+      ignored: "{{system_server.ignored | default(false)}}",
+      disabled: "{{system_server.disabled | default(false)}}",
+      port: 49000,
+      replicas: "{{system_server.replicas}}",
+      docker_image_name: "somersault-cloud/system",
+      docker_image_version: "{{system_server.image_version}}",
+      java_opts: "{{system_server.java_opts}}"
+  }
+  - { name: "somersault-cloud-infra",
+      service_id: "infra-server",
+      ignored: "{{system_server.ignored | default(false)}}",
+      disabled: "{{infra_server.disabled | default(false)}}",
+      port: 49100,
+      replicas: "{{infra_server.replicas}}",
+      docker_image_name: "somersault-cloud/infra",
+      docker_image_version: "{{infra_server.image_version}}",
+      java_opts: "{{infra_server.java_opts}}"
+  }
+  - { name: "somersault-cloud-bpm",
+      service_id: "bpm-server",
+      ignored: "{{bpm_server.ignored | default(false)}}",
+      disabled: "{{bpm_server.disabled | default(false)}}",
+      port: 49200,
+      replicas: "{{bpm_server.replicas}}",
+      docker_image_name: "somersault-cloud/bpm",
+      docker_image_version: "{{bpm_server.image_version}}",
+      java_opts: "{{bpm_server.java_opts}}"
+  }
+  - { name: "somersault-cloud-report",
+      service_id: "report-server",
+      ignored: "{{report_server.ignored | default(false)}}",
+      disabled: "{{report_server.disabled | default(false)}}",
+      port: 49300,
+      replicas: "{{report_server.replicas}}",
+      docker_image_name: "somersault-cloud/report",
+      docker_image_version: "{{report_server.image_version}}",
+      java_opts: "{{report_server.java_opts}}"
+  }
+  - { name: "somersault-cloud-iot",
+      service_id: "iot-server",
+      ignored: "{{iot_server.ignored | default(false)}}",
+      disabled: "{{iot_server.disabled | default(false)}}",
+      port: 49500,
+      replicas: "{{iot_server.replicas}}",
+      docker_image_name: "somersault-cloud/iot",
+      docker_image_version: "{{iot_server.image_version}}",
+      java_opts: "{{iot_server.java_opts}}"
+  }
+  - { name: "somersault-cloud-gateway",
+      service_id: "gateway-server",
+      ignored: "{{gateway_server.ignored | default(false)}}",
+      disabled: "{{gateway_server.disabled | default(false)}}",
+      port: "{{gateway_port | int}}",
+      replicas: 1,
+      docker_image_name: "somersault-cloud/gateway",
+      docker_image_version: "{{gateway_server.image_version}}",
+      java_opts: "{{gateway_server.java_opts}}"
+  }

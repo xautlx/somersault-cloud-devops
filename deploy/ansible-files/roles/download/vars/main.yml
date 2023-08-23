@@ -1,0 +1,3 @@
+---
+docker_pull_repo_user: docker
+docker_pull_repo_passwd: RepoP@ssword4Docker

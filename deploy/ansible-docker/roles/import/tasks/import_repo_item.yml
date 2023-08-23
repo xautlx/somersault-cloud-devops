@@ -1,0 +1,17 @@
+---
+# 清空失效镜像： docker rmi `docker images | grep '<none>' | awk '{print $3}'`
+- name: local docker load from image tar files
+  delegate_to: localhost
+  shell:
+    cmd: "docker load -i {{image_file.repository|basename}}@{{image_file.tag}}.tar"
+    chdir: "{{role_path}}/files"
+
+- name: local docker tag from image tar files
+  delegate_to: localhost
+  shell:
+    cmd: "docker tag {{image_file.repository}}:{{image_file.tag}} {{docker_repo_addr}}/{{image_file.repository}}:{{image_file.tag}}"
+
+- name: local docker push from image tar files
+  delegate_to: localhost
+  shell:
+    cmd: "docker push {{docker_repo_addr}}/{{image_file.repository}}:{{image_file.tag}}"

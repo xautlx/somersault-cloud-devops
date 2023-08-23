@@ -1,0 +1,132 @@
+---
+- name: create data dir
+  file:
+    path: "{{initdb_datadir}}"
+    state: directory
+
+- name: copy scripts file into initdb datadir
+  copy:
+    src: "{{item}}"
+    dest: "{{initdb_datadir}}/{{ item | basename }}"
+  with_fileglob:
+    - "{{role_path}}/files/*.sql"
+
+- name: Get mysql master addr from hosts config
+  set_fact:
+    mysql_master_vip: "{{hostvars[item]['ansible_ssh_host']}}"
+    mysql_user: "{{hostvars[item]['mysql_user']}}"
+    mysql_passwd: "{{hostvars[item]['mysql_passwd']}}"
+  when: hostvars[item]['mysql_master_vip'] is defined and hostvars[item]['mysql_master_vip'] == 'auto'
+  with_items: "{{groups['mysql']}}"
+
+- name: Get mysql master addr from hosts config
+  set_fact:
+    mysql_master_vip: "{{hostvars[item]['mysql_master_vip']}}"
+    mysql_user: "{{hostvars[item]['mysql_user']}}"
+    mysql_passwd: "{{hostvars[item]['mysql_passwd']}}"
+  when: hostvars[item]['mysql_master_vip'] is defined and hostvars[item]['mysql_master_vip'] != 'auto'
+  with_items: "{{groups['mysql']}}"
+
+- name: Get mysql master addr from hosts config
+  set_fact:
+    mysql_master_vip: "{{hostvars[item]['ansible_ssh_host']}}"
+  when: hostvars[item]['mysql_master_vip'] is defined and hostvars[item]['mysql_master_vip'] == 'auto'
+  with_items: "{{groups['mysql']}}"
+
+- name: Get backup keepalived_ip from hosts config
+  set_fact:
+    openresty_vip_addr: "{{hostvars[item]['openresty_keepalived_vip']}}:{{hostvars[groups['apps_openresty'][0]]['dashboard_admin_port']}}"
+  when: hostvars[item]['openresty_keepalived_vip'] is defined
+  with_items: "{{groups['apps_openresty']}}"
+
+- name: Get backup keepalived_ip from hosts config
+  set_fact:
+    openresty_vip_addr: "{{hostvars[groups['apps_openresty'][0]]['ansible_ssh_host']}}:{{hostvars[groups['apps_openresty'][0]]['dashboard_admin_port']}}"
+  when: openresty_vip_addr is not defined
+
+- name: Get nacos dashboard addr from hosts config
+  set_fact:
+    nacos_dashboard_addr: "{{hostvars[groups['nacos'][0]]['ansible_ssh_host']}}:{{nacos_port}}"
+  when: groups['nacos'] | length <= 1
+
+- name: Get nacos dashboard addr from hosts config
+  set_fact:
+    nacos_dashboard_addr: "{{openresty_vip_addr}}"
+  when: groups['nacos'] | length > 1
+
+- name: Get xxl_job dashboard addr from hosts config
+  set_fact:
+    xxl_job_dashboard_addr: "{{hostvars[groups['xxl_job'][0]]['ansible_ssh_host']}}:{{xxl_job_port}}"
+  when: groups['xxl_job'] | length <= 1
+
+- name: Get xxl_job dashboard addr from hosts config
+  set_fact:
+    xxl_job_dashboard_addr: "{{openresty_vip_addr}}"
+  when: groups['xxl_job'] | length > 1
+
+- name: Get skywalking ui addr from hosts config
+  set_fact:
+    skywalking_dashboard_addr: "{{hostvars[item]['ansible_ssh_host']}}:{{hostvars[item]['skywalking_ui_port']}}"
+  when: hostvars[item]['skywalking_ui_port'] is defined
+  with_items: "{{groups['skywalking'] | default([])}}"
+  failed_when: false
+
+- name: Get rokcetmq dashboard addr from hosts config
+  set_fact:
+    rokcetmq_dashboard_addr: "{{hostvars[item]['ansible_ssh_host']}}:{{hostvars[item]['rocketmq_dashboard_port']}}"
+  when: hostvars[item]['rocketmq_dashboard_port'] is defined
+  with_items: "{{groups['rocketmq_mqnamesrv']}}"
+
+- name: Get prometheus dashboard addr from hosts config
+  set_fact:
+    prometheus_dashboard_addr: "{{hostvars[item]['ansible_ssh_host']}}:{{hostvars[item]['prometheus_port']}}"
+  when: hostvars[item]['prometheus_port'] is defined
+  with_items: "{{groups['prometheus'] | default([])}}"
+  failed_when: false
+
+- name: Get alertmanager dashboard addr from hosts config
+  set_fact:
+    alertmanager_dashboard_addr: "{{hostvars[item]['ansible_ssh_host']}}:{{hostvars[item]['alertmanager_port']}}"
+  when: hostvars[item]['alertmanager_port'] is defined
+  with_items: "{{groups['alertmanager'] | default([])}}"
+  failed_when: false
+
+- name: Get grafana dashboard addr from hosts config
+  set_fact:
+    grafana_dashboard_addr: "{{hostvars[item]['ansible_ssh_host']}}:{{hostvars[item]['grafana_port']}}"
+  when: hostvars[item]['grafana_port'] is defined
+  with_items: "{{groups['grafana'] | default([])}}"
+  failed_when: false
+
+- name: Get monitor dashboard addr from hosts config
+  set_fact:
+    monitor_dashboard_addr: "{{hostvars[item]['ansible_ssh_host']}}:{{hostvars[item]['monitor_port']}}"
+  when: hostvars[item]['monitor_port'] is defined
+  with_items: "{{groups['monitor'] | default([])}}"
+  failed_when: false
+
+- name: copy deploy update sql files
+  template:
+    src: "{{ item }}"
+    dest: "{{initdb_datadir}}/{{ item | basename }}"
+  with_fileglob:
+    - "templates/*.sql"
+
+- name: source scripts file in initdb datafiles
+  shell: mysql -u{{ mysql_user }} -p{{ mysql_passwd }} -NBe "source {{initdb_datadir}}/{{ item | basename }};"
+  loop: "{{ query('fileglob', '{{role_path}}/files/*.sql') | sort }}"
+  failed_when: false
+
+- name: source scripts file in ddl_update datadir
+  shell: mysql -u{{ mysql_user }} -p{{ mysql_passwd }} -NBe "source {{initdb_datadir}}/{{ item | basename }};"
+  loop: "{{ query('fileglob', '{{role_path}}/templates/*.sql') | sort }}"
+
+# 出于安全考虑按文件删除，而不是直接目录变量删除
+# 如果脚本名称变更了，请手工清除服务器上遗留脚本文件
+- name: remove scripts file in initdb datadir
+  file:
+    path: "{{initdb_datadir}}/{{ item | basename }}"
+    state: absent
+  with_fileglob:
+    - "{{role_path}}/files/*.sql"
+    - "{{role_path}}/templates/*.sql"

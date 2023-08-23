@@ -1,0 +1,6 @@
+---
+- name: install gogs service
+  hosts: gogs
+  become: yes
+  roles:
+    - role: gogs

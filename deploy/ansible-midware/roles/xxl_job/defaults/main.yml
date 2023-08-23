@@ -1,0 +1,6 @@
+---
+xxl_job_version: "2.2.0"
+xxl_job_dir: "/data/xxl-job"
+
+xxl_job_port: "9090"
+

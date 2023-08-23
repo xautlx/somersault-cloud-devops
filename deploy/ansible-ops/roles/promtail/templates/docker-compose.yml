@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  "promtail-{{log_group}}":
+    image: "{{docker_image_repo | default('')}}grafana/promtail:{{promtail_version}}"
+    container_name: "promtail-{{log_group}}"
+    restart: always
+    volumes:
+      - ./config.yml:/etc/promtail/config.yml:ro
+
+  {% if log_group == 'openresty' %}
+
+      - /data/openresty/logs:/var/log/openresty/somersault-cloud-nginx:ro
+
+  {% endif %}
+  {% if log_group == 'microservice' %}
+
+      - /data/microservice/somersault-cloud-system/logs:/var/log/microservice/somersault-cloud-system:ro
+      - /data/microservice/somersault-cloud-infra/logs:/var/log/microservice/somersault-cloud-infra:ro
+      - /data/microservice/somersault-cloud-bpm/logs:/var/log/microservice/somersault-cloud-bpm:ro
+      - /data/microservice/somersault-cloud-report/logs:/var/log/microservice/somersault-cloud-report:ro
+      - /data/microservice/somersault-cloud-device/logs:/var/log/microservice/somersault-cloud-device:ro
+      - /data/microservice/somersault-cloud-gateway/logs:/var/log/microservice/somersault-cloud-gateway:ro
+
+  {% endif %}
+
+    command: -config.file=/etc/promtail/config.yml

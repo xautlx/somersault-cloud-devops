@@ -1,0 +1,57 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: create conf dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{alertmanager_main_dir}}"
+
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    state: directory
+  loop:
+    - "{{alertmanager_data_dir}}"
+
+- name: copy docker files
+  template:
+    src: "{{ item }}"
+    dest: "{{alertmanager_main_dir}}/{{ item }}"
+  loop:
+    - docker-compose.yml
+
+- name: copy conf files
+  template:
+    src: "{{ item }}"
+    dest: "{{alertmanager_main_dir}}/{{ item }}"
+  loop:
+    - alertmanager.yml
+    - dingtalk.yml
+
+#- name: copy prometheus rules files
+#  copy:
+#    src: "{{ item }}"
+#    dest: "{{app_conf_dir}}/prometheus/{{ item | basename }}"
+#    owner: "{{app_user}}"
+#    group: "{{app_group}}"
+#  with_fileglob:
+#    - "files/conf/prometheus/*"
+#  tags: ['conf-prometheus']
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{alertmanager_main_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{alertmanager_main_dir}}"

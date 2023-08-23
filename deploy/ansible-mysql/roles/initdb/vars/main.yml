@@ -1,0 +1,4 @@
+# 注意：部分全局参数在 group_vars/all.yml 中定义
+
+# 指定落盘数据到 /data 目录便于可靠存储于挂载数据盘
+initdb_datadir: /data/mysql/initdb

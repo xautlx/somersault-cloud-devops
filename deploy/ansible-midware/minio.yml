@@ -1,0 +1,6 @@
+---
+- name: install minio service
+  hosts: minio
+  become: yes
+  roles:
+    - role: minio

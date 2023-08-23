@@ -1,0 +1,15 @@
+---
+- name: Set frp latest version
+  set_fact:
+    frp_version: '{{ frp_version_latest.json.name.replace("v", "") }}'
+  when: frp_version == ""
+
+- name: Output {{ frp }} version
+  debug:
+    msg:
+      - 'Installed version: {{ frp_version_installed.stdout|default("Not Installed", True)|trim }}'
+      - "Target version: {{ frp_version }}"
+
+- name: Check frp outdated
+  set_fact:
+    frp_outdated: "{{ frp_version_installed.stdout is not defined or frp_version_installed.stdout|trim != frp_version }}"

@@ -1,0 +1,40 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: create data dir
+  file:
+    path: "{{loki_dir}}/{{item}}"
+    owner: '10001'
+    state: directory
+  loop:
+    - "data"
+
+- name: copy docker files
+  template:
+    src: "{{item}}"
+    dest: "{{loki_dir}}/{{item}}"
+  loop:
+    - "docker-compose.yml"
+    - "loki-config.yaml"
+
+- name: copy rule files
+  copy:
+    src: "{{item}}"
+    dest: "{{loki_dir}}/{{item | basename}}"
+    owner: '10001'
+  loop:
+    - "files/loki-rules.yml"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{loki_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{loki_dir}}"

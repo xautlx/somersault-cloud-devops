@@ -1,0 +1,6 @@
+---
+loki_version: "2.7.5"
+loki_dir: "/data/loki"
+loki_port: "3100"
+loki_grpc_port: "9096"
+

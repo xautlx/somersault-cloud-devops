@@ -1,0 +1,21 @@
+---
+- name: create data dir
+  file:
+    path: "{{initdb_datadir}}"
+    state: directory
+
+- name: copy scripts file into initdb datadir
+  copy:
+    src: "init-db.sql"
+    dest: "{{initdb_datadir}}/init-db.sql"
+
+- name: source scripts file in initdb datadir
+  shell: mysql -uroot -p'{{ mysql_root_password }}' -NBe "source {{initdb_datadir}}/init-db.sql;"
+  failed_when: false
+
+# 出于安全考虑按文件删除，而不是直接目录变量删除
+# 如果脚本名称变更了，请手工清除服务器上遗留脚本文件
+- name: remove scripts file in initdb datadir
+  file:
+    path: "{{initdb_datadir}}/init-db.sql"
+    state: absent

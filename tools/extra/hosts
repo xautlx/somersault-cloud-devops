@@ -1,0 +1,36 @@
+# 注意请勿随意修改各分组名称，脚本中会基于分组名称获取其主机IP等信息做服务间关联配置
+[all]
+frps-server ansible_ssh_host=124.71.2.242
+tool-server ansible_ssh_host=192.168.1.199
+server00    ansible_ssh_host=192.168.1.200
+[all:vars]
+ansible_ssh_port=22
+ansible_ssh_user=root
+
+[ddns]
+tool-server ddns_domains=tun6 cron_minute=1
+[ddns:vars]
+# 按实际修改主域名
+ddns_domain_name=entdiy.xyz
+# 按实际修改为IPv6地址关联网卡名称
+ddns_network_interface=ens192
+# 按实际修改分配到的IPv6地址给出前缀部分定义，用于grep定位DDNS同步的IPv6地址值
+ddns_ipv6_prefix=240e
+
+[frps]
+frps-server
+[frps:vars]
+ansible_ssh_user=root
+
+[frpc]
+tool-server  frpc_ssh_port=199 frpc_app_port_prefix=
+server00     frpc_ssh_port=200
+[frpc:vars]
+ansible_ssh_user=root
+frpc_server_addr=124.71.2.242
+
+[openvpn]
+tool-server
+[openvpn:vars]
+openvpn_port=4300
+

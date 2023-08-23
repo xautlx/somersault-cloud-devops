@@ -1,0 +1,29 @@
+---
+- name: setup mqnamesrv vars
+  set_fact:
+    rocketmq_mqnamesrv_dir: "{{rocketmq_dir}}/mqnamesrv"
+
+- name: create data dir
+  file:
+    path: "{{rocketmq_mqnamesrv_dir}}/{{item}}"
+    owner: "3000"
+    group: "3000"
+    state: directory
+  loop:
+    - "logs"
+
+- name: copy docker files
+  template:
+    src: "docker-compose-mqnamesrv.yml"
+    dest: "{{rocketmq_mqnamesrv_dir}}/docker-compose.yml"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{rocketmq_mqnamesrv_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{rocketmq_mqnamesrv_dir}}"

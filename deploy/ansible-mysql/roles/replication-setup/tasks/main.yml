@@ -1,0 +1,5 @@
+---
+
+- ansible.builtin.include_tasks: replication-setup.yml
+  when:
+    - groups['mysql'] | length >= 2

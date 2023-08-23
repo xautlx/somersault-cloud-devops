@@ -1,0 +1,86 @@
+#https://raw.githubusercontent.com/grafana/loki/v2.7.5/cmd/loki/loki-local-config.yaml
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+common:
+  instance_addr: {{hostvars[inventory_hostname]['ansible_ssh_host']}}
+  path_prefix: /tmp/loki
+  storage:
+    filesystem:
+      chunks_directory: /tmp/loki/chunks
+      rules_directory: /tmp/loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+query_range:
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+
+# rules规则存储
+# 主要支持本地存储（local）和对象文件系统（azure, gcs, s3, swift）
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /etc/loki/rules # Loki告警规则存储路径
+  rule_path: /tmp/loki/rules-temp
+  # alertmanager地址和端口
+  alertmanager_url: http://{{hostvars[groups['alertmanager'][0]]['ansible_ssh_host']}}:{{hostvars[groups['alertmanager'][0]]['alertmanager_port']}}
+  ring:
+    kvstore:
+      store: inmemory
+  enable_api: true
+  enable_alertmanager_v2: true
+
+# By default, Loki will send anonymous, but uniquely-identifiable usage and configuration
+# analytics to Grafana Labs. These statistics are sent to https://stats.grafana.org/
+#
+# Statistics help us better understand how Loki is used, and they show us performance
+# levels for most users. This helps us prioritize features and documentation.
+# For more information on what's sent, look at
+# https://github.com/grafana/loki/blob/main/pkg/usagestats/stats.go
+# Refer to the buildReport method to see what goes into a report.
+#
+# If you would like to disable reporting, uncomment the following lines:
+#analytics:
+#  reporting_enabled: false
+
+#limits_config:
+#  # 每个租户的最大日志流个数
+#  max_streams_per_user: 100000
+#
+#  #启用全局的租户最大日志流个数，默认0关闭
+#  #一旦配置，每个租户日志流将有ingester注册到hash环上同时状态为
+#  #HEALTH的个数动态计算得出，任何ingester的数量变化都会动态生效到这个值
+#  max_global_streams_per_user:  0
+#
+#  ingestion_rate_strategy: local
+#  enforce_metric_name: false
+#  reject_old_samples: true   # 是否拒绝旧样本
+#  reject_old_samples_max_age: 72h   # 72小时之前的样本被拒绝
+#  ingestion_rate_mb: 40
+#  ingestion_burst_size_mb: 20
+#
+#chunk_store_config:
+#  max_look_back_period: 72h  # 为避免查询超过保留期的数据，必须小于或等于下方的时间值
+#table_manager:
+#  retention_deletes_enabled: true   # 保留删除开启
+#  retention_period: 72h  # 超过72h的块数据将被删除

@@ -1,0 +1,60 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://{{loki_host}}:{{loki_port}}/loki/api/v1/push
+
+scrape_configs:
+
+  {% if log_group == 'openresty' %}
+
+  - job_name: openresty
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          host: {{hostvars[inventory_hostname]['ansible_ssh_host']}}
+          job: openresty
+          __path__: /var/log/openresty/**/*.log
+
+  {% endif %}
+  {% if log_group == 'microservice' %}
+
+  - job_name: microservice
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          host: {{hostvars[inventory_hostname]['ansible_ssh_host']}}
+          job: microservice
+          __path__: /var/log/microservice/**/*.log
+    pipeline_stages:
+      - match:
+          selector: '{job="microservice"}'
+          stages:
+            - regex: # https://grafana.com/docs/loki/latest/clients/promtail/stages/regex/
+                expression: '^/var/log/microservice/(?P<module>\S+?)/(?P<port>\S+?)/(?P<category>\S+?)/.*$'
+                source: filename # 	/var/log/microservice/somersault-cloud-infra/49100/springboot/system-server.log
+            - regex: # https://grafana.com/docs/loki/latest/clients/promtail/stages/regex/
+                expression: '^(?s)(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\S+?)\s+(?P<level>\S+?)\s+(?P<content>.*)$'
+            - multiline:
+                firstline: '^\d{4}-\d{2}-\d{2}'
+                max_wait_time: 3s
+            - labels:
+                level:
+                time:
+                module:
+                port:
+                category:
+                #content:
+            - timestamp: # https://grafana.com/docs/loki/latest/clients/promtail/stages/timestamp/
+                format: '2023-04-26 20:00:43.465'
+                fallback_formats: ['2023-04-26 20:00:43,465']
+                source: time
+                location: Asia/Shanghai
+
+  {% endif %}

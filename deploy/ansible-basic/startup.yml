@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: print hosts list
+      delegate_to: localhost
+      debug:
+        msg: "{{index + 1}}. {{item}} ==> {{hostvars[item]['ansible_ssh_host']}}"
+      loop: "{{groups['all']}}"
+      loop_control:
+        index_var: index
+      when: inventory_hostname == groups['all'][0]

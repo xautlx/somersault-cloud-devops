@@ -1,0 +1,12 @@
+---
+- name: install redis
+  hosts: redis
+  become: yes
+  roles:
+    - role: redis
+
+- name: install sentinel
+  hosts: sentinel
+  become: yes
+  roles:
+    - role: sentinel

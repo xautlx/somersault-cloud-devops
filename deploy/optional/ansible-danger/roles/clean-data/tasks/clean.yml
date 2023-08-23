@@ -1,0 +1,39 @@
+---
+- name: stop node_exporter service
+  shell: "systemctl stop node_exporter && systemctl disable node_exporter"
+  failed_when: false
+
+- name: disable keepalived service
+  shell: "systemctl disable keepalived"
+  failed_when: false
+
+- name: kill keepalived service
+  shell: "systemctl kill keepalived"
+  failed_when: false
+
+- name: stop & disable the firewall service.
+  service:
+    name: firewall
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: remove all data files
+  file:
+    path: '{{ item }}'
+    state: absent
+  loop:
+    - "/etc/keepalived"
+    - "/etc/init.d/firewall"
+    - "/etc/firewall.bash"
+    - "/data"
+  failed_when: false
+
+- name: remove /tmp/ansible cache files
+  file:
+    path: '{{ item }}'
+    state: absent
+  loop:
+    - "/tmp/ansible"
+  when: clear_cached_tmp_install_files == true
+  failed_when: false

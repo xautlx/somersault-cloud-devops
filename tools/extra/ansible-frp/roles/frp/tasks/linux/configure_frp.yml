@@ -1,0 +1,29 @@
+- name: Configure {{ frp_service_name }}
+  become: yes
+  template:
+    src: "{{ component }}.ini"
+    dest: "{{ frp_config_dir }}/{{ frp_config_name|default(component, true) }}.ini"
+    owner: "{{app_user}}"
+    group: "{{app_group}}"
+    backup: yes
+  notify: restart {{ component }}
+  when: frp_config_file == ''
+
+- name: Copy {{ frp_service_name }} config file
+  become: yes
+  template:
+    src: "{{ frp_config_file }}"
+    dest: "{{ frp_config_dir }}/{{ frp_service_name|default(component, true) }}.ini"
+    owner: "{{app_user}}"
+    group: "{{app_group}}"
+    backup: yes
+  notify: restart {{ component }}
+  when: frp_config_file != ''
+
+- name: Configure {{ frp_service_name }} service
+  become: yes
+  systemd:
+    name: "{{ frp_service_name }}"
+    enabled: yes
+    daemon_reload: yes
+  when: ansible_service_mgr == "systemd"

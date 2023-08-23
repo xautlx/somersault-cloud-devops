@@ -1,0 +1,14 @@
+---
+- name: mysql replication clear
+  hosts: mysql
+  become: yes
+  roles:
+    - role: replication-clear
+      when: mysql_install | bool == True
+
+- name: mysql replication setup
+  hosts: mysql
+  become: yes
+  roles:
+    - role: replication-setup
+      when: mysql_install | bool == True

@@ -1,0 +1,52 @@
+---
+- name: show image_file
+  debug:
+    msg: "{{image_file}}"
+
+- name: set_fact
+  set_fact:
+    image_file_dir: "{{role_path}}/../../files/images/{{image_file.type}}"
+    image_file_name: "{{image_file.repository | basename}}@{{image_file.tag}}.tar"
+    image_full_tag: "{{image_file.registry | default('')}}{{image_file.repository}}:{{image_file.tag}}"
+
+- name: "create dir"
+  file:
+    path: "{{image_file_dir}}"
+    mode: "0755"
+    state: directory
+
+- name: Check image_file exists
+  stat:
+    path: "{{image_file_dir}}/{{image_file_name}}"
+  register: download_file_result
+
+- name: "try to download {{image_file_name}} from file server"
+  get_url:
+    url: "{{files_get_url_prefix}}/images/{{image_file.type}}/{{image_file_name}}"
+    dest: "{{image_file_dir}}/{{image_file_name}}"
+    mode: "0755"
+  failed_when: false
+  when: download_file_result.stat.exists == False
+
+- name: Check image_file exists again
+  stat:
+    path: "{{image_file_dir}}/{{image_file_name}}"
+  register: download_file_result
+
+- name: "docker pull {{image_full_tag}}"
+  shell:
+    cmd: "docker pull {{image_full_tag}}"
+  when: download_file_result.stat.exists == False
+
+- name: "docker tag {{image_full_tag}} to {{image_file.repository}}:{{image_file.tag}}"
+  shell:
+    cmd: "docker tag {{image_full_tag}} {{image_file.repository}}:{{image_file.tag}}"
+  when:
+    - image_file.registry is defined
+    - download_file_result.stat.exists == False
+
+- name: "docker save {{image_file_name}}"
+  shell:
+    cmd: "docker save {{image_file.repository}}:{{image_file.tag}} > {{image_file_name}}"
+    chdir: "{{image_file_dir}}"
+  when: download_file_result.stat.exists == False

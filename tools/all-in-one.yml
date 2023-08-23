@@ -1,0 +1,7 @@
+---
+- import_playbook: ansible-basic/system.yml
+- import_playbook: ansible-basic/iptables.yml
+- import_playbook: ansible-docker/docker.yml
+- import_playbook: ansible-tools/jenkins.yml
+- import_playbook: ansible-tools/registry.yml
+- import_playbook: ansible-tools/openresty.yml

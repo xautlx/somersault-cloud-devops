@@ -1,0 +1,6 @@
+---
+- name: install openresty service
+  hosts: openresty
+  become: yes
+  roles:
+    - role: openresty

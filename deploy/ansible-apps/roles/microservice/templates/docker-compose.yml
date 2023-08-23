@@ -1,0 +1,63 @@
+# 前台运行： docker compose up
+# 后台运行： docker compose up -d
+# 拉取新镜像运行： docker compose up -d --pull always
+# 删除容器： docker compose down
+# 清除异常容器： docker rm $(sudo docker ps -qf status=exited)
+# 清空失效镜像： docker rmi `docker images | grep '<none>' | awk '{print $3}'`
+
+# {% set nacos_addr = [] %}
+# {% for item in groups['nacos'] %}
+#   {{ nacos_addr.append("{}:{}".format(hostvars[item]['ansible_ssh_host'], hostvars[item]['nacos_port'])) }}
+# {% endfor %}
+
+# {% set xxl_job_hosts = [] %}
+# {% for item in groups['xxl_job'] %}
+#   {{  xxl_job_hosts.append("http://{}:{}/xxl-job-admin/".format(hostvars[item]['ansible_ssh_host'], hostvars[item]['xxl_job_port'])) }}
+# {% endfor %}
+
+version: "3"
+services:
+  "{{service_name}}-{{service_port}}":
+    image: "{{docker_image_repo | default('')}}{{service_port_config.docker_image_name}}:{{service_port_config.docker_image_version}}"
+    container_name: "{{service_name}}-{{service_port}}"
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: "prod"
+
+      ### 基础参数设置 ###
+      JAVA_OPTS: "{{service_port_config.java_opts}}"
+      CONTAINER_HOST_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
+      SERVER_PORT: {{service_port}}
+      # /actuator管理服务端口与应用服务端口分离，提高安全性：按照服务端口偏移+10
+      MANAGEMENT_SERVER_PORT: {{service_port | int +10}}
+
+      ### Nacos环境变量参数设置 ###
+      # 开启Nacos注册和配置服务，一般默认配置true
+      NACOS_CONFIG_ENABLED: "true"
+      NACOS_DISCOVERY_ENABLED: "true"
+      # TODO: 暂未实现基于配置密码动态生成SQL脚本，密码为固定值或需要手工修改SQL脚本实现
+      NACOS_USERNAME: "somersault-cloud"
+      NACOS_PASSWORD: "P@ssword4Nacos"
+      # Nacos服务端连接地址，建议前置负载均衡配置为单一IP和端口
+      NACOS_SERVER_ADDR: "{{ nacos_addr |  join(',') }}"
+      # 按需配置命名空间，如果不做隔离规划可配置使用默认空间：public
+      NACOS_NAMESPACE: "somersault-cloud"
+      # 对于容器化部署需要指定当前宿主机IP地址，如果是直接主机部署则无需指定此变量
+      NACOS_DISCOVERY_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
+
+      XXL_JOB_EXECUTOR_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
+      XXL_JOB_EXECUTOR_PORT: "{{service_port | int +20}}" # 各个服务按照服务端口偏移+20
+{% if groups['skywalking'] | length >= 1 %}
+      # 开启 SkyWalking Agent 配置，agent jar已在Dockerfile中定义置入
+      JAVA_AGENT: "-javaagent:/app/skywalking/skywalking-agent.jar"
+      SW_AGENT_NAME: "{{service_name}}"
+      SW_AGENT_COLLECTOR_BACKEND_SERVICES: "{{hostvars[groups['skywalking'][0]]['ansible_ssh_host']}}:{{hostvars[groups['skywalking'][0]]['skywalking_port']}}"
+      SW_AGENT_TRACE_IGNORE_PATH: "Redisson/PING,/actuator/**,/admin-boot/**"
+{% endif %}
+    ports:
+      - "{{service_port}}:{{service_port}}"
+      - "{{service_port | int + 55}}:9555" # Debug端口，默认按照服务端口偏移+55
+      - "{{service_port | int + 10}}:{{service_port | int + 10}}" # /actuator管理服务端口与应用服务端口分离，提高安全性：按照服务端口偏移+10
+      - "{{service_port | int + 20}}:{{service_port | int + 20}}" # XXL-JOB执行器回调端口，默认按照服务端口偏移+20
+    volumes:
+      - ../logs/{{service_port}}:/root/logs

@@ -1,0 +1,11 @@
+---
+#frps_version: ''
+#frps_config_name: ''
+
+# Use an existing config file;
+#frps_config_file: ''
+
+# Or create a config file.
+#frps_bind_addr: '0.0.0.0'
+frps_bind_port: 7000
+#frps_token: ''

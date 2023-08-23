@@ -1,0 +1,31 @@
+# https://github.com/apache/rocketmq-docker
+version: '3'
+services:
+
+  mqbroker:
+    image: "{{docker_image_repo | default('')}}apache/rocketmq:{{rocketmq_version}}"
+    container_name: "{{rocketmq_mqbroker_dirname}}"
+    restart: always
+  {% if rocketmq_replication_type == 'master' %}
+
+    ports:
+      - "10911:10911"
+      - "10909:10909"
+      - "10912:10912"
+
+  {% else %}
+
+    ports:
+      - "10921:10921"
+      - "10919:10919"
+      - "10922:10922"
+
+  {% endif %}
+
+    environment:
+      JAVA_OPT_EXT: {{rocketmq_broker_memory}}
+    command: sh mqbroker -c ../conf/broker.conf
+    volumes:
+      - ./conf/broker.conf:/home/rocketmq/rocketmq-{{rocketmq_version}}/conf/broker.conf
+      - ./logs:/home/rocketmq/logs/rocketmqlogs
+      - ./data:/home/rocketmq/store

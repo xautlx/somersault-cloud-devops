@@ -1,0 +1,9 @@
+[Unit]
+Description=NodeExporter
+
+[Service]
+TimeoutStartSec=0
+ExecStart={{ node_exporter_bin_path }} --web.listen-address={{ node_exporter_host }}:{{ node_exporter_port }} {{ node_exporter_options }}
+
+[Install]
+WantedBy=multi-user.target

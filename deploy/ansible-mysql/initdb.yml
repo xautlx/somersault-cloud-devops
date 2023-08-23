@@ -1,0 +1,7 @@
+---
+- name: init mysql database using sql file
+  hosts: mysql
+  become: yes
+  gather_facts: false
+  roles:
+    - role: initdb

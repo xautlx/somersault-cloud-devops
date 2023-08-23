@@ -1,0 +1,63 @@
+---
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "/etc/keepalived/conf.d"
+
+
+- name: Get mysql_master_vip from hosts config
+  set_fact:
+    keepalived_master_ip: "{{hostvars[item]['ansible_ssh_host']}}"
+    mysql_master_keepalived_vip: "{{hostvars[item]['mysql_master_vip']}}"
+  when: hostvars[item]['mysql_master_vip'] is defined
+  with_items: "{{groups['mysql']}}"
+
+- name: Get mysql_slave_vip from hosts config
+  set_fact:
+    keepalived_slave_ip: "{{hostvars[item]['ansible_ssh_host']}}"
+    mysql_slave_keepalived_vip: "{{hostvars[item]['mysql_slave_vip']}}"
+  when: hostvars[item]['mysql_slave_vip'] is defined
+  with_items: "{{groups['mysql']}}"
+
+# copy 主配置文件
+- name: copy configuration
+  template:
+    src: keepalived.conf
+    dest: /etc/keepalived/keepalived.conf
+
+# copy 业务配置文件
+- name: copy conf.d configuration
+  template:
+    src: "{{item}}"
+    dest: "/etc/keepalived/conf.d/{{ item | basename }}"
+  with_fileglob:
+    - "templates/conf.d/*.conf"
+
+- name: copy shell files
+  template:
+    src: "{{item}}"
+    dest: "/etc/keepalived/conf.d/{{ item | basename }}"
+    mode: "0764"
+  with_fileglob:
+    - "templates/conf.d/*.sh"
+
+- name: pkill keepalived
+  command: "pkill keepalived"
+  failed_when: false
+
+- name: Ensure keepalived is started and enabled on boot.
+  service:
+    name: "keepalived"
+    state: restarted
+    enabled: "true"
+
+- name: print access info
+  debug:
+    msg: "{{item}}"
+  loop:
+    - "MySQL Master VIP Endpoint: http://{{mysql_master_keepalived_vip}}:{{mysql_port}}"
+    - "MySQL Slave VIP Endpoint: http://{{mysql_slave_keepalived_vip}}:{{mysql_port}}"
+  when: inventory_hostname == groups['mysql'][0]

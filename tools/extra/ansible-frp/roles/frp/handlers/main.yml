@@ -1,0 +1,15 @@
+---
+# Linux
+- name: restart frpc
+  become: yes
+  systemd:
+    name: "{{ frpc_service_name }}"
+    state: restarted
+  when: ansible_service_mgr == "systemd"
+
+- name: restart frps
+  become: yes
+  systemd:
+    name: "{{ frps_service_name }}"
+    state: restarted
+  when: ansible_service_mgr == "systemd"

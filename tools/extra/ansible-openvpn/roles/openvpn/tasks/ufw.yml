@@ -1,0 +1,61 @@
+---
+- name: Start ufw service
+  service:
+    name: ufw
+    enabled: true
+    state: started
+
+- name: Enable ufw
+  ufw:
+    direction: incoming
+    state: enabled
+    policy: allow
+
+- name: Enable forwarding - ufw
+  lineinfile:
+    dest: /etc/default/ufw
+    regexp: "^DEFAULT_FORWARD_POLICY="
+    line: DEFAULT_FORWARD_POLICY="ACCEPT"
+
+- name: Allow incoming VPN connections - ufw
+  ufw:
+    direction: in
+    proto: "{{ openvpn_proto }}"
+    to_port: "{{ openvpn_port | string }}"
+    rule: allow
+
+- name: Accept packets from VPN tunnel adaptor - ufw
+  ufw:
+    direction: in
+    interface: tun0
+    rule: allow
+
+- name: Setup nat table rules - ufw
+  blockinfile:
+    dest: /etc/ufw/before.rules
+    state: present
+    insertbefore: \*filter
+    block: |
+      # OpenVPN config
+      *nat
+      :POSTROUTING ACCEPT [0:0]
+      -A POSTROUTING -s {{ openvpn_server_network }}/24 -j SNAT --to-source {{ ansible_default_ipv4.address }}
+      COMMIT
+  when: not openvpn_masquerade_not_snat
+  notify:
+    - restart ufw
+
+- name: Setup nat table rules with MASQUERADE - ufw
+  blockinfile:
+    dest: /etc/ufw/before.rules
+    state: present
+    insertbefore: \*filter
+    block: |
+      # OpenVPN config
+      *nat
+      :POSTROUTING ACCEPT [0:0]
+      -A POSTROUTING -s {{ openvpn_server_network }}/24 -j MASQUERADE
+      COMMIT
+  when: openvpn_masquerade_not_snat
+  notify:
+    - restart ufw

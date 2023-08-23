@@ -1,0 +1,3 @@
+---
+- name: Include tasks for {{ frp_os }}
+  include_tasks: "{{ frp_os }}/main.yml"

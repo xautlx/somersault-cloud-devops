@@ -1,0 +1,28 @@
+---
+#- name: copy file to target
+#  copy:
+#    src: "{{role_path}}/files/{{download_file.source}}"
+#    dest: "{{role_path}}/../../../{{file_path}}"
+#  loop: "{{ download_file.targets }}"
+#  loop_control:
+#    loop_var: file_path
+#  tags: delivery
+
+- name: create packages dir path
+  file:
+    path: "{{role_path}}/../../files/packages"
+    mode: "0755"
+    state: directory
+
+- name: get packages dir path
+  shell:
+    cmd: "pwd"
+    chdir: "{{role_path}}/../../files/packages"
+  register: packages_dir
+
+- name: link to target files
+  shell:
+    cmd: "ln -sf {{packages_dir.stdout}}/{{package_file.source}} {{role_path}}/../../../{{file_path}}/{{package_file.source | basename}} "
+  loop: "{{ package_file.targets }}"
+  loop_control:
+    loop_var: file_path

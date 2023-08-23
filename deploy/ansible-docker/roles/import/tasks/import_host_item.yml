@@ -1,0 +1,20 @@
+---
+- name: upload basic docker image tar files
+  copy:
+    src: '{{image_file.repository|basename}}@{{image_file.tag}}.tar'
+    dest: '{{install_tmp_dir}}'
+
+- name: docker load from basic image tar files
+  shell:
+    cmd: "docker load -i {{image_file.repository|basename}}@{{image_file.tag}}.tar"
+    chdir: "{{install_tmp_dir}}"
+
+- name: upload apps docker image tar files
+  copy:
+    src: '{{image_file.repository|basename}}@{{image_file.tag}}.tar'
+    dest: '{{install_tmp_dir}}'
+
+- name: docker load from apps image tar files
+  shell:
+    cmd: "docker load -i {{image_file.repository|basename}}@{{image_file.tag}}.tar"
+    chdir: "{{install_tmp_dir}}"

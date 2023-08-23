@@ -1,0 +1,20 @@
+---
+- name: set_fact
+  set_fact:
+    sql_file_dir: "{{role_path}}/../../files/sql_scripts/mysql"
+
+- name: get sql file dir path
+  shell:
+    cmd: "pwd"
+    chdir: "{{sql_file_dir}}"
+  register: sql_dir
+
+- name: show sql file dir path
+  debug:
+    msg: "{{sql_dir.stdout}}"
+
+- name: link to sql files
+  shell:
+    cmd: "ln -sf {{sql_dir.stdout}}/{{item | basename}} {{role_path}}/../../../ansible-mysql/roles/initdata/files/{{item | basename}} "
+  with_fileglob:
+    - "{{sql_dir.stdout}}/*.sql"

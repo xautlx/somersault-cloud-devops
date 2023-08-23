@@ -1,0 +1,6 @@
+---
+prometheus_version: v2.37.3
+prometheus_port: 9090
+prometheus_main_dir: "/data/prometheus"
+prometheus_data_dir: "{{prometheus_main_dir}}/data"
+prometheus_file_sd_configs_temp: "/tmp/file_sd_configs"

@@ -1,0 +1,15 @@
+---
+- hosts: mysql
+  gather_facts: false
+  become: yes
+  vars:
+    - ansible_ssh_user: root
+  vars_prompt:
+    - name: confirm_clean
+      prompt: "Dangerous!!! Confirm clean ALL MySQL package & data ? yes/no"
+      default: "no"
+      confirm: true
+      private: false
+  tasks:
+  roles:
+    - role: clean-mysql

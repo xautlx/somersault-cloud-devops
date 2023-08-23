@@ -1,0 +1,18 @@
+galaxy_info:
+  author: kitos9112
+
+  description: Install and configure frp Server and/or Client on Linux
+  license: MIT
+
+  min_ansible_version: 2.9
+
+  # https://galaxy.ansible.com/api/v1/platforms/
+  platforms:
+    - name: GenericLinux
+      versions:
+        - any
+
+  galaxy_tags:
+    - frp
+    - frpc
+    - frps

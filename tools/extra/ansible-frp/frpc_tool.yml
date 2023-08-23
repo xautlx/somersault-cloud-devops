@@ -1,0 +1,9 @@
+---
+- hosts: frpc
+  become: yes
+  roles:
+    - role: frp
+      frp: frpc
+      frpc_config_name: tool
+      frpc_config_file: "frpc_tool.ini"
+      when: frpc_app_port_prefix is defined

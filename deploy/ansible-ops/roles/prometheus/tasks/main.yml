@@ -1,0 +1,89 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: create conf dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{prometheus_main_dir}}"
+    - "{{prometheus_main_dir}}/rules"
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    # fix "open /prometheus/queries.active: permission denied"
+    owner: "65534"
+    group: "65534"
+    state: directory
+  loop:
+    - "{{prometheus_data_dir}}"
+
+- name: Get alertmanager host & port from hosts config
+  set_fact:
+    alertmanager_host: "{{hostvars[item]['ansible_ssh_host']}}"
+    alertmanager_port: "{{hostvars[item]['alertmanager_port']}}"
+  when: "{{item == groups['alertmanager'][0]}}"
+  with_items: "{{groups['all']}}"
+
+- name: copy docker files
+  template:
+    src: "{{ item }}"
+    dest: "{{prometheus_main_dir}}/{{ item }}"
+  loop:
+    - docker-compose.yml
+
+- name: copy conf files
+  template:
+    src: "{{ item }}"
+    dest: "{{prometheus_main_dir}}/{{ item }}"
+  loop:
+    - prometheus.yml
+
+- name: copy rules files
+  copy:
+    src: "{{ item }}"
+    dest: "{{prometheus_main_dir}}/rules/{{ item | basename }}"
+  with_fileglob:
+    - "files/rules/*"
+
+- name: empty file_sd_configs microservice directory
+  file:
+    state: absent
+    path: '{{prometheus_main_dir}}/file_sd_configs/microservice'
+
+- name: recreate file_sd_configs microservice directory
+  file:
+    state: directory
+    path: '{{prometheus_main_dir}}/file_sd_configs/microservice'
+
+- name: copy file_sd_configs files
+  copy:
+    src: "{{ item }}"
+    dest: "{{prometheus_main_dir}}/file_sd_configs/microservice/{{ item | basename }}"
+  with_fileglob:
+    - "{{prometheus_file_sd_configs_temp}}/microservice/*"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{prometheus_main_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{prometheus_main_dir}}"
+
+- name: waiting docker compose up
+  shell:
+    cmd: "sleep 10"
+    chdir: "{{prometheus_main_dir}}"
+
+- name: reload prometheus conf
+  shell:
+    cmd: "curl -X POST http://127.0.0.1:{{prometheus_port}}/-/reload"

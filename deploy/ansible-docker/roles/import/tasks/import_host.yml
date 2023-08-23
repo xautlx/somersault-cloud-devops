@@ -1,0 +1,13 @@
+---
+
+- name: "docker images | grep '{{image_file.repository}}' | grep '{{image_file.tag}}' | wc -l"
+  shell: "docker images | grep '{{image_file.repository}}' | grep '{{image_file.tag}}' | wc -l"
+  register: docker_image_exist
+
+- name: show docker_image_exist result
+  debug:
+    msg: "{{docker_image_exist.stdout}}"
+
+- include_tasks: import_host_item.yml
+  when:
+    - docker_image_exist.stdout == '0'

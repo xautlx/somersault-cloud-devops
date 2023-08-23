@@ -1,0 +1,5 @@
+---
+alertmanager_version: v0.24.0
+alertmanager_port: 9093
+alertmanager_main_dir: "/data/alertmanager"
+alertmanager_data_dir: "{{alertmanager_main_dir}}/data"

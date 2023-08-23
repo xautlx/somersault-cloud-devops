@@ -1,0 +1,25 @@
+# 前台运行： docker compose up
+# 后台运行： docker compose up -d
+# 重建容器运行： docker compose up -d --build
+# 显示构建信息运行： DOCKER_BUILDKIT=0  docker compose up -d --build
+# 删除容器： docker compose down
+version: "3.8"
+services:
+  registry:
+    image: registry:{{registry_version}}
+    container_name: registry
+    volumes:
+      # - ./config.yml:/etc/docker/registry/config.yml
+      - ./htpasswd:/auth/htpasswd # 认证秘钥文件挂载
+      - ./data/registry:/var/lib/registry
+    ports:
+      - {{registry_port}}:5000
+    environment:
+      JAVA_OPTS: "-Xms128m -Xmx256m"
+      TZ: Asia/Shanghai
+      # 开启认证
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+      REGISTRY_STORAGE_DELETE_ENABLED: true
+    restart: always

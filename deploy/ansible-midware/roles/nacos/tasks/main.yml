@@ -1,0 +1,46 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: create data dir
+  file:
+    path: "{{nacos_dir}}/{{item}}"
+    state: directory
+  loop:
+    - "logs"
+
+- name: Get mysql master addr from hosts config
+  set_fact:
+    mysql_replication_master_host: "{{hostvars[item]['ansible_ssh_host']}}"
+    mysql_replication_master_port: "{{hostvars[item]['mysql_port']}}"
+  when: hostvars[item]['mysql_master_vip'] is defined and hostvars[item]['mysql_master_vip'] == 'auto'
+  with_items: "{{groups['mysql']}}"
+
+- name: Get mysql master addr from hosts config
+  set_fact:
+    mysql_replication_master_host: "{{hostvars[item]['mysql_master_vip']}}"
+    mysql_replication_master_port: "{{hostvars[item]['mysql_port']}}"
+  when: hostvars[item]['mysql_master_vip'] is defined and hostvars[item]['mysql_master_vip'] != 'auto'
+  with_items: "{{groups['mysql']}}"
+
+- name: copy docker files
+  template:
+    src: "{{item}}"
+    dest: "{{nacos_dir}}/{{item}}"
+  loop:
+    - "docker-compose.yml"
+    - "nacos-logback.xml"
+    - "nacos-ip.env"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{nacos_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{nacos_dir}}"

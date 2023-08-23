@@ -1,0 +1,4 @@
+---
+
+- ansible.builtin.include_tasks: promtail.yml
+  when: groups['loki'] | length >= 1

@@ -1,0 +1,4 @@
+---
+
+- ansible.builtin.include_tasks: node_exporter.yml
+  when: groups['prometheus'] | length > 0

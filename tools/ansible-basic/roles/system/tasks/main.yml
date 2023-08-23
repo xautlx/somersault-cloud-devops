@@ -1,0 +1,67 @@
+---
+- name: stop firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: stop selinux
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: SELINUX=disabled
+
+- name: setup hostname
+  shell:
+    cmd: '{{item}}'
+  loop:
+    - 'hostname {{inventory_hostname}}'
+    - 'echo {{inventory_hostname}} > /etc/hostname'
+  when: force_update_hostname | bool == True
+
+- name: set UseDNS no for /etc/ssh/sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '#UseDNS yes'
+    line: "UseDNS no"
+
+- name: check repo for tsinghua.edu.cn
+  shell:
+    cmd: "grep tsinghua.edu.cn /etc/yum.repos.d/CentOS-Base.repo"
+  register: repo_result
+  failed_when: false
+
+# https://mirrors.tuna.tsinghua.edu.cn/help/centos/
+# https://mirrors.tuna.tsinghua.edu.cn/help/epel/
+- name: update repo to tsinghua.edu.cn
+  shell:
+    cmd: "{{item}}"
+  loop:
+    - "sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+                -e 's|^#baseurl=http://mirror.centos.org/centos|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos|g' \
+                -i.bak \
+                /etc/yum.repos.d/CentOS-*.repo"
+    - "yum install -y epel-release"
+    - 'sed -e "s!^metalink=!#metalink=!g" \
+           -e "s!^#baseurl=!baseurl=!g" \
+           -e "s!https\?://download\.fedoraproject\.org/pub/epel!https://mirrors.tuna.tsinghua.edu.cn/epel!g" \
+           -e "s!https\?://download\.example/pub/epel!https://mirrors.tuna.tsinghua.edu.cn/epel!g" \
+           -i.bak /etc/yum.repos.d/epel*.repo'
+  when: repo_result.stdout == ''
+
+- name: clean & makecache repo for mirror repo
+  shell:
+    cmd: "{{item}}"
+  with_items:
+    - "yum makecache"
+  when:
+    - repo_result.stdout == ''
+
+- name: yum install packages
+  shell:
+    cmd: "yum install -y {{item}}"
+  loop:
+    - "nc"
+    - "telnet"
+    - "net-tools"
+    - "yum-utils"

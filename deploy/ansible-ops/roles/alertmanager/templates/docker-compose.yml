@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  alertmanager:
+    image: "{{docker_image_repo | default('')}}prom/alertmanager:{{alertmanager_version}}"
+    container_name: prom_alertmanager
+    restart: always
+    hostname: alertmanager
+    ports:
+      - '{{alertmanager_port}}:9093'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./data:/alertmanager
+    environment:
+      - TZ=Asia/Shanghai
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    links:
+      - dingtalk:dingtalk
+
+  dingtalk:
+    image: "{{docker_image_repo | default('')}}timonwong/prometheus-webhook-dingtalk:v2.1.0"
+    container_name: prom_dingtalk
+    restart: always
+    hostname: dingtalk
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./dingtalk.yml:/etc/prometheus-webhook-dingtalk/config.yml:ro
+    environment:
+      - TZ=Asia/Shanghai
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+    ports:
+      - "8060:8060"

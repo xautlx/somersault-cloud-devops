@@ -1,0 +1,15 @@
+version: '3'
+services:
+  redis-sentinel:
+    image: "{{docker_image_repo | default('')}}redis:{{redis_version}}"
+    container_name: redis-sentinel
+    restart: always
+    ports:
+      - "{{sentinel_port}}:{{sentinel_port}}"
+    volumes:
+      - "./data:/data"
+      # sentinel会自动更新sentinel.conf， 因此需要以目录方式挂载配置文件，否则会抛出异常：
+      # WARNING: Sentinel was not able to save the new configuration on disk!!!: Device or resource busy
+      - "./conf:/etc/redis"
+    command:
+       redis-sentinel /etc/redis/sentinel.conf

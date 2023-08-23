@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+  prometheus:
+    image: "{{docker_image_repo | default('')}}prom/prometheus:{{prometheus_version}}"
+    container_name: prom_prometheus
+    hostname: prometheus
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+      - TZ=Asia/Shanghai
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./rules:/etc/prometheus/rules
+      - ./file_sd_configs:/etc/prometheus/file_sd_configs
+      - ./data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.external-url=http://{{hostvars[inventory_hostname]['ansible_ssh_host']}}:{{prometheus_port}}/'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=3d'
+    ports:
+      - '{{prometheus_port}}:9090'
+    restart: always

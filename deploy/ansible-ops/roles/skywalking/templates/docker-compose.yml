@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  skywalking-oap:
+    image: "{{docker_image_repo | default('')}}apache/skywalking-oap-server:{{skywalking_version}}"
+    container_name: skywalking-oap
+    restart: always
+    ports:
+      - "{{skywalking_port}}:11800"
+      - "{{skywalking_port+1000}}:12800"
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+      - TZ=Asia/Shanghai
+      - JAVA_OPTS=-Xms128m -Xmx512m
+  skywalking-ui:
+    image: "{{docker_image_repo | default('')}}apache/skywalking-ui:{{skywalking_version}}"
+    container_name: skywalking-ui
+    restart: always
+    depends_on:
+      - skywalking-oap
+    ports:
+      - "{{skywalking_ui_port}}:8080"
+    environment:
+      - JAVA_OPTS=-Xms128m -Xmx256m
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+      - TZ=Asia/Shanghai
+      - SW_OAP_ADDRESS=http://skywalking-oap:{{skywalking_port+1000}}

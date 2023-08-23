@@ -1,0 +1,34 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: "create data dir "
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{monitor_data_dir}}/logs"
+
+- name: Include nacos-config.yml task
+  include_tasks: nacos-config.yml
+
+- name: "copy docker files"
+  template:
+    src: "{{ item }}"
+    dest: "{{monitor_data_dir}}/{{ item }}"
+  loop:
+    - docker-compose.yml
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{monitor_data_dir}}"
+  failed_when: false
+
+- name: docker compose up -d --pull always
+  shell:
+    cmd: "docker compose up -d --pull always"
+    chdir: "{{monitor_data_dir}}"

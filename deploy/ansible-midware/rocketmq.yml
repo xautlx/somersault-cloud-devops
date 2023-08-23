@@ -1,0 +1,35 @@
+---
+- name: install rocketmq mqnamesrv
+  hosts: rocketmq_mqnamesrv
+  become: yes
+  roles:
+    - role: rocketmq
+      vars:
+        - rocketmq_replication_role: 'mqnamesrv'
+
+- name: install rocketmq mqbroker master
+  hosts: rocketmq_mqbroker_master
+  become: yes
+  roles:
+    - role: rocketmq
+      vars:
+        - rocketmq_replication_role: 'mqbroker'
+        - rocketmq_replication_type: 'master'
+
+- name: install rocketmq mqbroker slave
+  hosts: rocketmq_mqbroker_slave
+  become: yes
+  roles:
+    - role: rocketmq
+      vars:
+        - rocketmq_replication_role: 'mqbroker'
+        - rocketmq_replication_type: 'slave'
+
+- name: install rocketmq mqdashboard
+  # 默认取namesrv主机双节点安装dashboard，如果需要资源分离可以按需定义调整
+  hosts: rocketmq_mqnamesrv
+  become: yes
+  roles:
+    - role: rocketmq
+      vars:
+        - rocketmq_replication_role: 'mqdashboard'

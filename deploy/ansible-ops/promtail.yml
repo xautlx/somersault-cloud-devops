@@ -1,0 +1,16 @@
+---
+- name: install openresty promtail
+  hosts: apps_openresty
+  become: yes
+  roles:
+    - role: promtail
+      vars:
+        log_group: openresty
+
+- name: install microservice promtail
+  hosts: apps_microservice
+  become: yes
+  roles:
+    - role: promtail
+      vars:
+        log_group: microservice

@@ -1,0 +1,69 @@
+# {% set namesrv_hosts = [] %}
+# {% for item in groups['rocketmq_mqnamesrv'] %}
+#   {{  namesrv_hosts.append("{}:{}".format(hostvars[item]['ansible_ssh_host'], hostvars[item]['rocketmq_mqnamesrv_port'])) }}
+# {% endfor %}
+# {% set namesrv_hosts_join = namesrv_hosts |  join(';') %}
+
+# {% set xxl_job_hosts = [] %}
+# {% for item in groups['xxl_job'] %}
+#   {{  xxl_job_hosts.append("http://{}:{}/xxl-job-admin/".format(hostvars[item]['ansible_ssh_host'], hostvars[item]['xxl_job_port'])) }}
+# {% endfor %}
+# {% set xxl_job_hosts_join = xxl_job_hosts |  join(',') %}
+
+# {% set redis_sentinel_hosts = [] %}
+# {% for item in groups['sentinel'] %}
+#   {{  redis_sentinel_hosts.append("{}:{}".format(hostvars[item]['ansible_ssh_host'], hostvars[item]['sentinel_port'])) }}
+# {% endfor %}
+# {% set redis_sentinel_hosts_join = redis_sentinel_hosts |  join(',') %}
+
+--- #################### 数据库相关配置 ####################
+spring:
+  datasource:
+    dynamic: # 多数据源配置
+      primary: master
+      datasource:
+        master:
+          name: somersault_cloud_system
+          url: jdbc:mysql://{{mysql_replication_master_addr}}/${spring.datasource.dynamic.datasource.master.name}?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8&nullCatalogMeansCurrent=true
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          username: somersault_cloud
+          password: {{mysql_passwd}}
+        slave:
+          name: somersault_cloud_system
+          url: jdbc:mysql://{{mysql_replication_slave_addr}}/${spring.datasource.dynamic.datasource.slave.name}?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8&nullCatalogMeansCurrent=true
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          username: somersault_cloud
+          password: {{mysql_passwd}}
+
+  # Redis 配置
+  redis:
+    database: 0        # Redis数据库索引（默认为0）
+    password: {{redis_requirepass}}   # Redis服务器连接密码（默认为空）
+{% if groups['sentinel'] | length >= 1 %}
+    sentinel:
+      nodes: {{redis_sentinel_hosts_join}} # 集群哨兵节点配置，多个节点之间用英文逗号分割
+      master: {{sentinel_master_name}}     # Redis主节点名称，哨兵配置文件中的名称
+{% else %}
+    host: {{redis_replication_master_host}}    # Redis服务器地址
+    port: {{redis_replication_master_port}}    # Redis服务器连接端口
+{% endif %}
+
+
+
+--- #################### MQ 消息队列相关配置 ####################
+spring:
+  cloud:
+    stream:
+      rocketmq:
+        binder:
+          name-server: {{namesrv_hosts_join}} # RocketMQ Namesrv 地址
+
+--- #################### 定时任务相关配置 ####################
+xxl:
+  job:
+    admin:
+      addresses: {{xxl_job_hosts_join}} # 调度中心部署跟地址，集群多个地址逗号分隔
+    executor:
+      ip: ${XXL_JOB_EXECUTOR_IP:} # 取Nacos注册的IP兼容Docker容器运行模式
+      port: ${XXL_JOB_EXECUTOR_PORT:} # 默认端口为9999，实际部署调整为服务端口偏移+20
+    accessToken: {{xxl_job_access_token}} # 执行器通讯TOKEN

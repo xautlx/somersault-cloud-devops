@@ -1,0 +1,6 @@
+---
+nacos_version: "v2.2.1-slim"
+nacos_dir: "/data/nacos"
+
+nacos_port: "8848"
+

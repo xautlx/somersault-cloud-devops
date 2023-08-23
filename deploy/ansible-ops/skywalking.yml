@@ -1,0 +1,6 @@
+---
+- name: install skywalking
+  hosts: skywalking
+  become: yes
+  roles:
+    - role: skywalking

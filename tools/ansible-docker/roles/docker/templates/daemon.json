@@ -1,0 +1,20 @@
+{
+  "ipv6": false,
+  "insecure-registries": [
+    "{{hostvars[groups['registry'][0]]['ansible_default_ipv4']['address']}}:{{hostvars[groups['registry'][0]]['registry_port']}}"
+  ],
+  "dns": ["8.8.8.8", "114.114.114.114"],
+  "registry-mirrors": [
+    "https://hmodyls1.mirror.aliyuncs.com",
+    "https://docker.mirrors.ustc.edu.cn/",
+    "https://hub-mirror.c.163.com",
+    "https://registry.docker-cn.com"
+  ],
+  "bip": "178.90.0.1/24",
+  "default-address-pools": [
+    {
+      "base": "{{docker_address_pools}}",
+      "size": 24
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  mysqld-exporter:
+    image: "{{docker_image_repo | default('')}}prom/mysqld-exporter:{{mysqld_exporter_version}}"
+    container_name: mysqld-exporter
+    restart: always
+    ports:
+      - "{{mysql_prom_exporter_port}}:9104"
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./my-cnf.ini:/etc/my-cnf.ini:ro
+    command: --config.my-cnf=/etc/my-cnf.ini

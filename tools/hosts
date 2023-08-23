@@ -1,0 +1,34 @@
+# 注意请勿随意修改各分组名称，脚本中会基于分组名称获取其主机IP等信息做服务间关联配置
+[all]
+tool-server ansible_ssh_host=192.168.1.199
+[all:vars]
+ansible_ssh_port=22
+ansible_ssh_user=root
+
+[docker]
+tool-server
+[docker:vars]
+docker_address_pools=172.16.0.1/16
+
+[registry]
+tool-server
+[registry:vars]
+registry_port=5000
+repo_docker_user=docker
+repo_docker_passwd=RepoP@ssword4Docker
+
+[gogs]
+tool-server
+[gogs:vars]
+gogs_port=3000
+
+[jenkins]
+tool-server
+[jenkins:vars]
+jenkins_port=8080
+
+[openresty]
+tool-server
+[openresty:vars]
+http_port=80
+

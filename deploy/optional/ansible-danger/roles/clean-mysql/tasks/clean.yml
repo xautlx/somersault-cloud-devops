@@ -1,0 +1,44 @@
+---
+- name: disable mysqld service
+  shell: "systemctl disable mysqld"
+  failed_when: false
+
+- name: kill mysqld service
+  shell: "systemctl kill mysqld"
+  failed_when: false
+
+#- name: yum-complete-transaction --cleanup-only
+#  shell: "yum-complete-transaction --cleanup-only"
+#  failed_when: false
+#
+#- name: remove mysql package
+#  shell: "timeout 10 yum -y remove $(rpm -qa | grep -i -e mysql-community -e mysql80-community)"
+#  failed_when: false
+#
+#- name: yum-complete-transaction --cleanup-only
+#  shell: "yum-complete-transaction --cleanup-only"
+#  failed_when: false
+
+# yum list installed|grep mysql OR rpm -qa|grep mysql
+- name: remove mysql package
+  shell: "yum -y remove {{item}}"
+  loop:
+    - "mysql-community-libs-compat"
+    - "MySQL-python"
+  retries: 3
+  ignore_errors: true
+
+- name: remove mysql data & conf files
+  file:
+    path: '{{ item }}'
+    state: absent
+  loop:
+    - "/usr/local/mysql"
+    - "/var/lib/mysql"
+    - "/data/mysql"
+    - "/etc/my.cnf"
+    - "/var/log/mysqld.err"
+    - "/var/log/mysqld.log"
+    - "/usr/bin/mysql"
+    - "/etc/init.d/mysqld"
+  failed_when: false

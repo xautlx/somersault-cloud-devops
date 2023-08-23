@@ -1,0 +1,3 @@
+# 提升Nacos默认日志级别配置，减少大量日志文件输出，详见： templates/nacos-logback.xml
+logback_info_level_to: WARN
+logback_debug_level_to: INFO

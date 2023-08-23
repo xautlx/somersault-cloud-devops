@@ -1,0 +1,22 @@
+# 前台运行： docker compose up
+# 后台运行： docker compose up -d
+# 拉取新镜像运行： docker compose up -d --pull always
+# 删除容器： docker compose down
+# 清除异常容器： docker rm $(sudo docker ps -qf status=exited)
+# 清空失效镜像： docker rmi `docker images | grep '<none>' | awk '{print $3}'`
+version: "3"
+services:
+  openresty:
+    container_name: openresty
+    # https://mirrors.tuna.tsinghua.edu.cn/help/debian/
+    image: "openresty/openresty:1.21.4.1-0-bullseye-fat"
+    restart: always
+    ports:
+      - "{{http_port}}:{{http_port}}"
+      - "{{http_tunnel_port}}:{{http_tunnel_port}}"
+    volumes:
+      - ./conf/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
+      - ./conf/conf.d:/etc/nginx/conf.d
+      - ./conf/cert:/usr/local/openresty/nginx/conf/cert
+      - ./html:/usr/local/openresty/nginx/html
+      - ./logs:/usr/local/openresty/nginx/logs

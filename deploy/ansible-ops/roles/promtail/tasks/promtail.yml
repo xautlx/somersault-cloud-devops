@@ -1,0 +1,41 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: set local vars
+  set_fact:
+    promtail_dir: "{{promtail_main_dir}}/{{log_group}}"
+
+- name: create data dir
+  file:
+    path: "{{promtail_dir}}"
+    mode: "755"
+    state: directory
+
+- name: Get loki_port host ip from hosts config
+  set_fact:
+    loki_host: "{{hostvars[item]['ansible_ssh_host']}}"
+    loki_port: "{{hostvars[item]['loki_port']}}"
+  when: hostvars[item]['loki_port'] is defined
+  with_items: "{{groups['loki'] | default([])}}"
+
+- name: copy docker files
+  template:
+    src: "{{item}}"
+    dest: "{{promtail_dir}}/{{item}}"
+  loop:
+    - "docker-compose.yml"
+    - "config.yml"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{promtail_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{promtail_dir}}"

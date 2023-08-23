@@ -1,0 +1,39 @@
+---
+frp_token: P@sswd4frp
+
+frps_version: 0.44.0
+frpc_version: "{{frps_version}}"
+frps_config_file: "frps.ini"
+frp_bin_dir: /opt/frp
+frp_config_dir: /opt/frp
+frps_vhost_http_port: 8000
+frps_vhost_https_port: 8443
+frps_bind_udp_port: 7001
+
+app_user: "{{ansible_ssh_user}}"
+app_group: "{{ansible_ssh_user}}"
+
+frp: "{{ 'frpc' if role_name.endswith('frpc') else 'frps' }}"
+frp_os: >-
+  {%- if ansible_system == 'Linux' -%}
+    linux
+  {%- endif %}
+
+# ansible_architecture: x86_64, 64-bit
+frp_architecture_map:
+  x64_64: amd64
+  64-bit: amd64
+  aarch64: arm64
+frp_arch: "{{ frp_architecture_map[ansible_architecture] | default('amd64') }}"
+
+frp_config_name: "{% if frpc_config_name is defined %}{{ frpc_config_name }}{% elif frps_config_name is defined %}{{ frps_config_name }}{% endif %}"
+frp_config_file: "{% if frpc_config_file is defined %}{{ frpc_config_file }}{% elif frps_config_file is defined %}{{ frps_config_file }}{% endif %}"
+frp_version: "{% if frpc_version is defined %}{{ frpc_version.replace('v', '') }}{% elif frps_version is defined %}{{ frps_version.replace('v', '') }}{% endif %}"
+
+frp_release_name: frp_{{frp_version}}_{{frp_os}}_{{frp_arch}}
+frp_release_ext: "{{ 'tar.gz' if frp_os == 'linux' else 'zip' }}"
+frp_release_url: https://sourceforge.net/projects/frp.mirror/files/v{{frp_version}}/{{frp_release_name}}.{{frp_release_ext}}
+
+frp_service_name: "{{ component }}{{ '_'+frp_config_name if frp_config_name != '' else '' }}"
+frpc_service_name: "frpc{{ '_'+frpc_config_name if frpc_config_name is defined else '' }}"
+frps_service_name: "frps{{ '_'+frpc_config_name if frpc_config_name is defined else '' }}"

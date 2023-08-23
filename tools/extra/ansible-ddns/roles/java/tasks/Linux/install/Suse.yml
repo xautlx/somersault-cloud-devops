@@ -1,0 +1,15 @@
+---
+- name: OpenJDK Repository
+  community.general.zypper_repository:
+    name: openjdk
+    repo: "{{ openjdk_zypper_repo_url }}"
+    state: present
+
+- name: Install java packages
+  zypper:
+    name: '{{ (transport == "repositories") | ternary(jdk_package, java_artifact) }}'
+    state: present
+  register: package_install
+  retries: 20
+  delay: 5
+  until: package_install is succeeded

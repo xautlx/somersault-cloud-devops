@@ -1,0 +1,23 @@
+---
+- name: create data dir
+  file:
+    path: "{{gogs_dir}}"
+    state: directory
+
+- name: copy docker files
+  template:
+    src: "{{item}}"
+    dest: "{{gogs_dir}}/{{item}}"
+  loop:
+    - "docker-compose.yml"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{gogs_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{gogs_dir}}"

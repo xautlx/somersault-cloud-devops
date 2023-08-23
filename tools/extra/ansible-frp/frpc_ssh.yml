@@ -1,0 +1,8 @@
+---
+- hosts: frpc
+  become: yes
+  roles:
+    - role: frp
+      frp: frpc
+      frpc_config_name: ssh
+      frpc_config_file: "frpc_ssh.ini"

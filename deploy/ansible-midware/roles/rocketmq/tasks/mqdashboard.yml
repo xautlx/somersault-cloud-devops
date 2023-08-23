@@ -1,0 +1,31 @@
+---
+- name: setup mqdashboard vars
+  set_fact:
+    rocketmq_mqdashboard_dir: "{{rocketmq_dir}}/mqdashboard"
+    rocketmq_dashboard_password: "{{hostvars[inventory_hostname]['dashboard_admin_passwd']}}"
+
+- name: create mqdashboard dir
+  file:
+    path: "{{rocketmq_mqdashboard_dir}}/data"
+    state: directory
+
+- name: copy users.properties files
+  template:
+    src: "users.properties"
+    dest: "{{rocketmq_mqdashboard_dir}}/data/users.properties"
+
+- name: copy docker files
+  template:
+    src: "docker-compose-mqdashboard.yml"
+    dest: "{{rocketmq_mqdashboard_dir}}/docker-compose.yml"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{rocketmq_mqdashboard_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{rocketmq_mqdashboard_dir}}"

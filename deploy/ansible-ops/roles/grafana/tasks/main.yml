@@ -1,0 +1,50 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: create data dir
+  file:
+    path: "{{grafana_dir}}/{{item}}"
+    owner: "472"
+    state: directory
+  loop:
+    - "data"
+
+- name: copy docker files
+  template:
+    src: "{{item}}"
+    dest: "{{grafana_dir}}/{{item}}"
+  loop:
+    - "docker-compose.yml"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{grafana_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{grafana_dir}}"
+
+- name: check grafana_inited exists
+  stat:
+    path: "{{grafana_dir}}/grafana_inited"
+  register: grafana_inited_result
+
+- name: init setup grafana admin password
+  shell:
+    cmd: "docker exec -ti grafana grafana-cli admin reset-admin-password {{grafana_admin_password}}"
+    chdir: "{{grafana_dir}}"
+  when:
+    - grafana_inited_result.stat.exists == False
+
+- name: generate grafana_inited file
+  shell:
+    cmd: "echo date > grafana_inited"
+    chdir: "{{grafana_dir}}"
+  when:
+    - grafana_inited_result.stat.exists == False

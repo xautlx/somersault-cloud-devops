@@ -1,0 +1,88 @@
+---
+- name: create data dir
+  file:
+    path: "{{item}}"
+    state: directory
+  loop:
+    - "{{jenkins_dir}}/data/jenkins/jobs"
+    - "{{jenkins_dir}}/data/jenkins/plugins"
+
+- name: unarchive jenkins job files
+  unarchive:
+    src: "jenkins_jobs.tar.gz"
+    dest: "{{jenkins_dir}}/data/jenkins/jobs/"
+    mode: 0755
+
+- name: copy docker files
+  template:
+    src: "{{item}}"
+    dest: "{{jenkins_dir}}/{{item}}"
+  loop:
+    - "docker-compose.yml"
+    - "Dockerfile"
+    - "plugins.txt"
+    - ".dockerignore"
+
+- name: "docker images | grep 'jenkins/jenkins-x' | grep '{{jenkins_version}}' | wc -l"
+  shell: "docker images | grep 'jenkins/jenkins-x' | grep '{{jenkins_version}}' | wc -l"
+  register: docker_image_exist
+
+- name: copy files
+  copy:
+    src: "{{item}}"
+    dest: "{{jenkins_dir}}/{{item}}"
+  loop:
+    - "dive_0.9.2_linux_amd64.deb"
+  when: docker_image_exist.stdout == '0'
+
+- name: docker pull images prepare for Dockerfile
+  shell:
+    cmd: "docker pull {{item}}"
+    chdir: "{{jenkins_dir}}"
+  loop:
+    - "node:{{node_version}}"
+    - "jenkins/jenkins:{{jenkins_version}}"
+    - "maven:{{maven_version}}"
+  when: docker_image_exist.stdout == '0'
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{jenkins_dir}}"
+  failed_when: false
+
+- name: docker compose build
+  shell:
+    cmd: "DOCKER_BUILDKIT=0 docker compose build"
+    chdir: "{{jenkins_dir}}"
+  when: docker_image_exist.stdout == '0'
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{jenkins_dir}}"
+
+- name: check plugins exist
+  shell: "ls -lh grep {{jenkins_dir}}/data/jenkins/plugins | wc -l"
+  register: check_plugins_exist
+
+- name: jenkins update ceneter
+  shell:
+    cmd: "{{item}}"
+    chdir: "{{jenkins_dir}}"
+  loop:
+    - "sleep 10s"
+    - "docker exec -ti jenkins sed -i 's#https://updates.jenkins.io/download#https://mirrors.tuna.tsinghua.edu.cn/jenkins#g' /var/jenkins_home/updates/default.json"
+    - "docker exec -ti jenkins sed -i 's#www.google.com#www.baidu.com#g' /var/jenkins_home/updates/default.json"
+  when: check_plugins_exist.stdout == '0'
+
+- name: jenkins plugin process
+  shell:
+    cmd: "{{item}}"
+    chdir: "{{jenkins_dir}}"
+  loop:
+    - "docker exec -ti jenkins jenkins-plugin-cli -f /usr/share/jenkins/ref/plugins.txt"
+  when: check_plugins_exist.stdout == '0'
+
+# P_ssword123Jenkins
+# <passwordHash>#jbcrypt:$2a$10$GyvfPBke6L3y5rDhhCXUA.bUNRoGLIE0uqnrNzD7EOdjyDhUdLj3q</passwordHash>

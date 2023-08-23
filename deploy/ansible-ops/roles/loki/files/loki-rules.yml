@@ -1,0 +1,27 @@
+groups:
+  - name: service OutOfMemoryError
+    rules:
+      # 关键字监控
+      - alert: loki check words java.lang.OutOfMemoryError
+        expr: sum by (host,module) (count_over_time({level="ERROR"} |= "java.lang.OutOfMemoryError" [5m])) > 0
+        labels:
+          severity: critical
+        annotations:
+          description: '{{$labels.host}} {{$labels.module}} OutOfMemoryError count: {{ $value }}'
+          summary: java.lang.OutOfMemoryError
+      # java 程序日志ERROR报警
+      - alert: loki java ERROR count check
+        expr: sum by (host,module) (count_over_time({level="ERROR"} [5m])) > 5
+        labels:
+          severity: warning
+        annotations:
+          description: '{{$labels.host}} {{$labels.module}} ERROR count: {{ $value }}'
+          summary: java ERROR count check
+      # java 程序日志性能报警
+      - alert: loki java full gc count check
+        expr: sum by (host,module) (count_over_time({level="Full GC"} [5m])) > 5
+        labels:
+          severity: warning
+        annotations:
+          description: '{{$labels.host}} {{$labels.module}} FULL GC count: {{ $value }}'
+          summary: java FULL GC count check

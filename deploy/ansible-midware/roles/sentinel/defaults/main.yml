@@ -1,0 +1,6 @@
+---
+redis_version: "6.2.0"
+
+sentinel_port: 26379
+
+sentinel_dir: "/data/sentinel"

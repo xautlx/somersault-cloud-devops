@@ -1,0 +1,29 @@
+---
+- name: check repo for tsinghua.edu.cn
+  shell:
+    cmd: "grep tsinghua.edu.cn /etc/yum.repos.d/docker-ce.repo"
+  register: repo_result
+  failed_when: false
+
+- name: yum config docker-ce.repo
+  shell:
+    cmd: "{{item}}"
+  loop:
+    - "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+    - "sed -i.bak 's+https://download.docker.com+https://mirrors.tuna.tsinghua.edu.cn/docker-ce+' /etc/yum.repos.d/docker-ce.repo"
+  when: repo_result is not defined or repo_result.stdout == ''
+
+- name: yum install -y docker-ce
+  shell:
+    cmd: "yum install -y docker-ce-{{docker_version}}"
+
+- name: setup docker daemon.json
+  template:
+    src: "daemon.json"
+    dest: "/etc/docker/daemon.json"
+
+- name: Ensure docker is started and enabled on boot.
+  service:
+    name: "docker"
+    state: restarted
+    enabled: "true"

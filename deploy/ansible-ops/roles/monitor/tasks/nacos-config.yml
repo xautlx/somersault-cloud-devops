@@ -1,0 +1,63 @@
+---
+- name: "create data dir for nacos config"
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{apps_nacos_config_dir}}/DEFAULT_GROUP"
+
+- name: Get nacos passwd from hosts config
+  set_fact:
+    nacos_passwd: "{{hostvars[groups['nacos'][0]]['nacos_passwd']}}"
+    nacos_port: "{{hostvars[groups['nacos'][0]]['nacos_port']}}"
+    nacos_host: "{{hostvars[groups['nacos'][0]]['ansible_ssh_host']}}"
+  with_items: "{{groups['nacos']}}"
+
+# https://nacos.io/zh-cn/docs/auth.html
+- name: Make an API call /nacos/v1/auth/login
+  uri:
+    method: POST
+    url: "http://{{ nacos_host }}:{{nacos_port}}/nacos/v1/auth/login"
+    body: "username=nacos&password={{ nacos_passwd }}"
+    # If you're interested in the response
+    return_content: yes
+  register: nacos_login_result
+
+#- name: response of /nacos/v1/auth/login
+#  debug:
+#    msg: "{{nacos_login_result.json}}"
+
+- name: set nacos_api_access_token
+  set_fact:
+    nacos_api_access_token: "{{nacos_login_result.json.accessToken}}"
+
+
+- name: copy nacos config files
+  template:
+    src: "{{item}}"
+    dest: "{{apps_nacos_config_dir}}/DEFAULT_GROUP/{{item | basename}}"
+  with_fileglob:
+    - "templates/nacos/*"
+
+- name: build DEFAULT_GROUP.zip
+  shell:
+    cmd: "zip nacos-import.zip DEFAULT_GROUP/*"
+    chdir: "{{apps_nacos_config_dir}}"
+
+# uri模块需要ansible 2.10版本才支持，降级使用系统crul指令方式
+- name: import DEFAULT_GROUP.zip
+  shell:
+    cmd: "curl -F 'file=@nacos-import.zip' -F 'policy=SKIP' -F 'namespace=somersault-cloud'  http://{{ nacos_host }}:{{nacos_port}}/nacos/v1/cs/configs?import=true&accessToken={{nacos_api_access_token}}&username=nacos&tenant=somersault-cloud"
+    chdir: "{{apps_nacos_config_dir}}"
+  register: nacos_configs_result
+
+- name: response of /nacos/v1/cs/configs
+  debug:
+    msg: "{{nacos_configs_result}}"
+
+# 清除服务器上遗留脚本文件
+- name: remove nacos config datadir
+  file:
+    path: "{{apps_nacos_config_dir}}"
+    state: absent

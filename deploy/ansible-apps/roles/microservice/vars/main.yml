@@ -1,0 +1,47 @@
+---
+
+gateway_port: 48080
+
+system_server: {
+  ignored: false,
+  replicas: 1,
+  java_opts: "-Xms128m -Xmx256m",
+  image_version: "1.0.0-snapshot"
+}
+
+infra_server: {
+  ignored: false,
+  replicas: 1,
+  java_opts: "-Xms128m -Xmx256m",
+  image_version: "1.0.0-snapshot"
+}
+
+bpm_server: {
+  ignored: false,
+  disabled: false,
+  replicas: 1,
+  java_opts: "-Xms128m -Xmx256m",
+  image_version: "1.0.0-snapshot"
+}
+
+report_server: {
+  ignored: false,
+  disabled: false,
+  replicas: 1,
+  java_opts: "-Xms128m -Xmx256m",
+  image_version: "1.0.0-snapshot"
+}
+
+iot_server: {
+  ignored: false,
+  disabled: false,
+  replicas: 1,
+  java_opts: "-Xms128m -Xmx256m",
+  image_version: "1.0.0-snapshot"
+}
+
+gateway_server: {
+  ignored: false,
+  java_opts: "-Xms128m -Xmx256m",
+  image_version: "1.0.0-snapshot"
+}

@@ -1,0 +1,33 @@
+# 前台运行： docker compose up
+# 后台运行： docker compose up -d
+# 重建容器运行： docker compose up -d --build
+# 显示构建信息运行： DOCKER_BUILDKIT=0  docker compose up -d --build
+# 删除容器： docker compose down
+version: "3.8"
+services:
+  nacos: # https://github.com/nacos-group/nacos-docker/blob/master/example/cluster-ip.yaml
+    image: "{{docker_image_repo | default('')}}nacos/nacos-server:{{nacos_version}}"
+    container_name: nacos
+    restart: always
+    environment:
+      SET_CONTAINER_TIMEZONE: true
+      CONTAINER_TIMEZONE: Asia/Shanghai
+      TZ: "Asia/Shanghai"
+      LANG: en_US.UTF-8
+      # JVM参数 https://nacos.io/zh-cn/docs/quick-start-docker.html
+      JVM_XMS: 128m   #-Xms default :2g
+      JVM_XMX: 256m   #-Xmx default :2g
+      JVM_XMN: 16m   #-Xmn default :1g
+      JVM_MS: 32m     #-XX:MetaspaceSize default :128m
+      JVM_MMS: 128m    #-XX:MaxMetaspaceSize default :320m
+    env_file:
+      - ./nacos-ip.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./nacos-logback.xml:/home/nacos/conf/nacos-logback.xml
+      - ./logs:/home/nacos/logs
+    ports:
+      - "{{nacos_port}}:8848" # 主服务端口
+      - "7848:7848" # 集群模式下：端口偏移量-1000，raft选举通讯端口
+      - "9848:9848" # 集群模式下：端口偏移量1000，客户端gRPC请求服务端端口，用于客户端向服务端发起连接和请求
+      - "9849:9849" # 集群模式下：端口偏移量1001，服务端gRPC请求服务端端口，用于服务间同步等

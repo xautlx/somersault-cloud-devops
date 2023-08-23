@@ -1,0 +1,20 @@
+---
+- name: create app group
+  group:
+    name: "{{ app_group }}"
+  when: app_group is not none and app_group != "root"
+
+- name: create app user
+  user:
+    name: "{{ app_user }}"
+    group: "{{app_group}}"
+    state: present
+    system: "no"
+  when: app_user is not none and app_user != "root"
+
+- name: Allow the app user to sudo
+  community.general.sudoers: # ansible-galaxy collection install  --no-deps  community.general
+    name: app-sudo
+    state: present
+    user: "{{ app_user }}"
+    commands: ALL

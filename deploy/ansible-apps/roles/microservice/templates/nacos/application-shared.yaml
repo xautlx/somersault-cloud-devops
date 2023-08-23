@@ -1,0 +1,50 @@
+---
+springdoc:
+  api-docs:
+    enabled: {{springdoc_swagger_enabled}} # 1. 是否开启 Swagger 接文档的元数据
+  swagger-ui:
+    enabled: {{springdoc_swagger_enabled}} # 2.1 是否开启 Swagger 文档的官方 UI 界面
+knife4j:
+  enable: {{springdoc_swagger_enabled}} # 2.2 是否开启 Swagger 文档的 Knife4j UI 界面
+
+# Spring Boot Admin 配置项
+spring:
+  boot:
+    admin:
+      # Spring Boot Admin Server 服务端的相关配置
+      context-path: /admin-boot
+      # Spring Boot Admin Client 客户端的相关配置
+      client:
+        #以ip注册到admin server上，默认false使用hostname注册
+        instance:
+          service-host-type: IP # 注册实例时，优先使用 IP [IP, HOST_NAME, CANONICAL_HOST_NAME]
+          prefer-ip: true
+        username: "admin"
+        password: "{{dashboard_admin_passwd}}"
+
+--- #################### 监控相关配置 ####################
+
+# Actuator 监控端点的配置项
+management:
+  # 暴露actuator的全部endpoint（即/actuator系列路径)，默认只暴露少数endpoint
+  endpoints:
+    web:
+      base-path: /actuator # Actuator 提供的 API 接口的根目录。默认为 /actuator
+      exposure:
+        include: "*"
+  # 显示节点健康的具体信息，/actuator/health默认只返回节点状态（up|down），不返回节点的具体信息
+  endpoint:
+    health:
+      show-details: always
+  # 默认只显示git的branch和commit id，开启全部显示git-commit-id-maven-plugin生成的git.properties信息
+  info:
+    git.mode: full
+
+--- #################### 框架相关配置 ####################
+biz:
+  web:
+    admin-ui:
+      url: https://www.test.com # Admin 管理后台的链接URL，会组装到相关通知功能的访问链接文本，一般配置为外部域名
+  tenant: # 多租户相关配置项
+    enable: true
+  demo: false # 演示模式

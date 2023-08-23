@@ -1,0 +1,15 @@
+---
+mysql_replication_name: repl
+mysql_replication_passwd: MySQLP@ssword4repl
+
+mysql_prom_exporter_name: prom_exporter
+mysql_prom_exporter_passwd: MySQLP@ssword4exporter
+
+db_names:
+  - "somersault_cloud_nacos"
+  - "somersault_cloud_job"
+  - "somersault_cloud_infra"
+  - "somersault_cloud_system"
+  - "somersault_cloud_bpm"
+  - "somersault_cloud_report"
+  - "somersault_cloud_iot"

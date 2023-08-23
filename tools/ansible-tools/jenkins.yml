@@ -1,0 +1,6 @@
+---
+- name: install jenkins service
+  hosts: jenkins
+  become: yes
+  roles:
+    - role: jenkins

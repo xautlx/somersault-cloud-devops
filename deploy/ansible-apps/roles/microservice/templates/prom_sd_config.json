@@ -1,0 +1,16 @@
+[
+  {
+    "targets": [
+      "{{ hostvars[inventory_hostname]['ansible_ssh_host'] }}:{{service_port | int + 10 }}"
+    ],
+    "labels": {
+      "project_name": "{{service_port_config.name}}",
+      "docker_image_name": "{{service_port_config.docker_image_name}}",
+      "docker_image_version": "{{service_port_config.docker_image_version}}",
+      "java_opts": "{{service_port_config.java_opts}}",
+      "application_name": "{{service_port_config.service_id}}",
+      "server_port": "{{service_port}}",
+      "management_server_port": "{{service_port | int + 10}}"
+    }
+  }
+]

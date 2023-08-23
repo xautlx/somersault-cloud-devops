@@ -1,0 +1,67 @@
+#!groovy
+
+pipeline {
+    agent any
+     parameters {
+
+           booleanParam name:"microservice_deploy",
+                        defaultValue: false,
+                        description:"是否触发 后端服务 更新部署"
+
+           booleanParam name:"frontend_deploy",
+                        defaultValue: false,
+                        description:"是否触发 前端服务 更新部署"
+
+           password name: "root_password",
+                   description: "首次输入开发服务器root密码做SSH免密初始化",
+                   defaultValue: ""
+
+           string name: "ansible_hosts",
+                   description: "更新部署的Ansible Hosts定义文件",
+                   defaultValue: "hosts-single"
+     }
+
+    environment {
+        GIT_PROJECT_ADDR="http://192.168.1.199:3000/entdiy.xyz/somersault-cloud-devops.git"
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git (url: "${env.GIT_PROJECT_ADDR}",
+                     credentialsId: 'git_secret_for_jenkins')
+            }
+        }
+
+        stage ("ssh authorize") {
+            when{
+                not {
+                   equals actual: "${params.root_password}" ,expected:""
+                }
+            }
+            steps{
+                sh "if [ ! -f ~/.ssh/id_rsa ]; then ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa; fi"
+                sh "ansible-playbook -e ansible_ssh_password=${params.root_password} -i deploy/${params.ansible_hosts} deploy/optional/ansible-authorize/authorize.yml"
+            }
+        }
+
+        stage ('Microservice Ansible Deploy') {
+            when{
+                equals actual: "${params.microservice_deploy}" ,expected:"true"
+            }
+            steps{
+                sh "ansible-playbook -i deploy/${params.ansible_hosts} deploy/ansible-apps/microservice.yml"
+                sh "ansible-playbook -i deploy/${params.ansible_hosts} deploy/ansible-ops/monitor.yml"
+            }
+        }
+
+        stage ('Frontend Ansible Deploy') {
+            when{
+                equals actual: "${params.frontend_deploy}" ,expected:"true"
+            }
+            steps{
+                sh "ansible-playbook -i deploy/${params.ansible_hosts} deploy/ansible-apps/openresty.yml"
+            }
+        }
+    }
+}

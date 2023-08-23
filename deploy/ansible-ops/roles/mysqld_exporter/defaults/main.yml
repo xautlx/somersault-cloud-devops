@@ -1,0 +1,5 @@
+---
+mysqld_exporter_version: "v0.14.0"
+mysqld_exporter_dir: "/data/mysqld-exporter"
+mysqld_exporter_port: "9104"
+

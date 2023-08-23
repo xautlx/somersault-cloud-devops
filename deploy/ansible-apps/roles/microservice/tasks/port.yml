@@ -1,0 +1,49 @@
+---
+- name: setting vars
+  set_fact:
+    service_name: "{{service_port_config.name}}"
+    service_port: "{{service_port_number}}"
+    service_port_dir: "{{apps_microservice_dir}}/{{service_port_config.name}}/{{service_port_number}}"
+
+- name: "create data dir for {{service_name+':'+ service_port}}"
+  file:
+    path: "{{dir_to_create}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{service_port_dir}}/logs"
+  loop_control:
+    loop_var: dir_to_create
+
+- name: "copy docker files to {{service_port_dir}}"
+  template:
+    src: "{{ file_to_create }}"
+    dest: "{{service_port_dir}}/{{ file_to_create }}"
+    force: true
+  loop:
+    - docker-compose.yml
+  loop_control:
+    loop_var: file_to_create
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{service_port_dir}}"
+  failed_when: false
+
+- name: "docker compose up -d --pull always for {{service_name+':'+ service_port}}"
+  shell:
+    cmd: "docker compose up -d --pull always"
+    chdir: "{{service_port_dir}}"
+  when: service_port_config.disabled == false
+
+- name: build & fetch prom_sd_config.json
+  template:
+    src: "prom_sd_config.json"
+    dest: "{{prometheus_file_sd_configs_temp}}/microservice/{{ hostvars[inventory_hostname]['ansible_ssh_host'] }}_{{service_port}}_plus10.json"
+    force: true
+  when:
+    - prometheus_file_sd_configs_dir is defined
+    - service_port_config.disabled == false and service_port_config.name != 'somersault-cloud-gateway'
+  delegate_to: localhost
+  become: false

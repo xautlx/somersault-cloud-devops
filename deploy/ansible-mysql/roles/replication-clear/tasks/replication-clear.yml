@@ -1,0 +1,11 @@
+### value of mode must be one of: getprimary, getreplica, changeprimary, stopreplica, startreplica, resetprimary, resetreplica, resetreplicaall
+---
+- name: Get replication master addr from hosts config
+  set_fact:
+    mysql_replication_master: "{{hostvars[item]['ansible_ssh_host']}}"
+  when: hostvars[inventory_hostname]['ansible_ssh_host'] != hostvars[item]['ansible_ssh_host']
+  with_items: "{{groups['mysql']}}"
+
+- name: Reset master replication.
+  shell: >
+    mysql -h{{mysql_replication_master}} -uroot -p'{{ mysql_root_password }}' -e "reset master;"

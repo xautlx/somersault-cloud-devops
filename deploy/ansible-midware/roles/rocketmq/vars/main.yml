@@ -1,0 +1,10 @@
+rocketmq_namesrv_memory: "-Xms128M -Xmx512M -Xmn64M"
+rocketmq_broker_memory: "-Xms128M -Xmx512M -Xmn64M"
+
+# 提升默认日志级别配置，减少大量日志文件输出，详见： templates/logback_xxx.xml
+logback_info_level_to: WARN
+logback_debug_level_to: INFO
+
+
+
+

@@ -1,0 +1,14 @@
+# https://github.com/apache/rocketmq-docker
+version: '3'
+services:
+  mqnamesrv:
+    image: "{{docker_image_repo | default('')}}apache/rocketmq:{{rocketmq_version}}"
+    container_name: mqnamesrv
+    restart: always
+    ports:
+      - "{{rocketmq_mqnamesrv_port}}:9876"
+    environment:
+      JAVA_OPT_EXT: {{rocketmq_namesrv_memory}}
+    command: sh mqnamesrv
+    volumes:
+      - ./logs:/home/rocketmq/logs/rocketmqlogs

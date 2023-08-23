@@ -1,0 +1,7 @@
+keepalived_version: "2.2.7"
+keepalived_path: "/data/keepalived"
+
+# 指定VIP虚拟IP所绑定网卡名称
+keepalived_interface: eth0
+# 双虚拟IP
+keepalived_vip_double: ""

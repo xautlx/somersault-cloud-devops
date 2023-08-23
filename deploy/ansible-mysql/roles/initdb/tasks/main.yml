@@ -1,0 +1,41 @@
+---
+- name: set_fact
+  set_fact:
+    db_user_hosts:
+      - "localhost"
+      - "{{mysql_user_host}}"
+      - "{{hostvars[groups['docker'][0]]['docker_address_pools'].split('0.0')[0]}}%"
+
+- name: print db_user_hosts
+  debug:
+    msg: "{{db_user_hosts}}"
+
+- name: "generate files/init-db.sql to local used for DBA"
+  template:
+    src: "init-db.sql"
+    dest: "{{role_path}}/files/init-db.sql"
+  delegate_to: localhost
+  become: false
+
+- name: "select count(*) from mysql.user where user = '{{mysql_user}}';"
+  shell: >
+    mysql -NBe "select count(*) from mysql.user where user = '{{mysql_user}}';"
+    -uroot -p"{{mysql_root_password}}" -h{{hostvars[inventory_hostname]['ansible_ssh_host']}}
+  register: initdata_count
+  failed_when: false
+  when:
+    - mysql_root_password | default('') != ''
+    - hostvars[inventory_hostname]['mysql_master_vip'] is defined
+
+- name: result of select count(*) from mysql.user where user = '{{mysql_user}}'
+  debug:
+    msg: "{{initdata_count.stdout}}"
+  when:
+    - mysql_root_password | default('') != ''
+    - hostvars[inventory_hostname]['mysql_master_vip'] is defined
+
+- ansible.builtin.include_tasks: initdb.yml
+  when:
+    - mysql_root_password | default('') != ''
+    - hostvars[inventory_hostname]['mysql_master_vip'] is defined
+    - initdata_count.stdout  == '0' or initdata_count.stdout  == ''

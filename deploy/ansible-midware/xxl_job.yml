@@ -1,0 +1,6 @@
+---
+- name: install xxl_job_admin
+  hosts: xxl_job
+  become: yes
+  roles:
+    - role: xxl_job

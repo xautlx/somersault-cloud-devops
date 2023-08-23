@@ -1,0 +1,26 @@
+---
+- name: Check keepalived exists
+  stat:
+    path: /usr/sbin/keepalived
+  register: keepalived_result
+
+- name: Get keepalived_master_ip from hosts config
+  set_fact:
+    keepalived_master_ip: "{{ansible_ssh_host}}"
+    openresty_keepalived_vip: "{{ansible_ssh_host}}"
+  when:
+    - groups['apps_openresty'] | length <= 1
+
+- include_tasks: keepalived.yml
+  when:
+    - groups['apps_openresty'] | length >= 2
+    - keepalived_result.stat.exists == False
+
+- include_tasks: keepalived_config.yml
+  when:
+    - groups['apps_openresty'] | length >= 2
+
+- name: print access info
+  debug:
+    msg: "Access Endpoint: http://{{openresty_keepalived_vip}}:{{http_port}}"
+  when: inventory_hostname == groups['apps_openresty'][0]

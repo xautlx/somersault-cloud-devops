@@ -1,0 +1,6 @@
+---
+gogs_version: "0.13.0"
+gogs_dir: "/tool/gogs"
+
+gogs_port: "3000"
+

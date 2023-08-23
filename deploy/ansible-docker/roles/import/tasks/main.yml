@@ -1,0 +1,40 @@
+---
+- name: set_fact
+  set_fact:
+    install_tmp_dir: /tmp/ansible/docker_images
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{install_tmp_dir}}"
+
+- include_tasks: import_host.yml
+  vars:
+    image_file: "{{item}}"
+  loop: "{{image_files}}"
+  when:
+    - docker_repo_addr | default('') == ''
+
+- name: "docker login {{docker_repo_addr}}"
+  delegate_to: localhost
+  shell: "docker login -u {{docker_repo_user}} -p {{docker_repo_passwd}} {{docker_repo_addr}}"
+  when:
+    - docker_repo_passwd is defined
+  register: docker_login_result
+
+- name: "show docker login result"
+  delegate_to: localhost
+  debug:
+    msg: "{{docker_login_result.stdout}}"
+  when: docker_repo_passwd is defined
+
+- include_tasks: import_repo.yml
+  vars:
+    image_file: "{{item}}"
+  loop: "{{image_files}}"
+  when:
+    - docker_repo_addr | default('') != ''
+    - inventory_hostname == groups['docker'][0]

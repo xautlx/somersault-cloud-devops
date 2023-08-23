@@ -1,0 +1,5 @@
+---
+grafana_version: "8.5.24"
+grafana_dir: "/data/grafana"
+grafana_port: "3000"
+

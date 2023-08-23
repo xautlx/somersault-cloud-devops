@@ -1,0 +1,14 @@
+---
+- name: Check keepalived exists
+  stat:
+    path: /etc/keepalived/keepalived.conf
+  register: keepalived_result
+
+- include_tasks: keepalived.yml
+  when:
+    - groups['mysql'] | length >= 2
+    - keepalived_result.stat.exists == False
+
+- include_tasks: keepalived_config.yml
+  when:
+    - groups['mysql'] | length >= 2

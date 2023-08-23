@@ -1,0 +1,140 @@
+# {{ ansible_managed }}
+
+{% if openvpn_local is defined %}
+local {{ openvpn_local }}
+{% endif %}
+port {{ openvpn_port }}
+{% if openvpn_dualstack %}
+proto {{ openvpn_proto }}6
+{% else %}
+proto {{ openvpn_proto }}
+{% endif %}
+dev tun
+
+ca {{ openvpn_key_dir }}/ca.crt
+cert {{ openvpn_key_dir }}/server.crt
+key {{ openvpn_key_dir }}/server.key
+dh {{ openvpn_key_dir }}/dh.pem
+{% if openvpn_crl_path is defined %}
+crl-verify {{ openvpn_crl_path }}
+{% endif %}
+{% if openvpn_use_crl|bool %}
+crl-verify {{ openvpn_key_dir }}/ca-crl.pem
+{% endif %}
+{% if tls_auth_required %}
+tls-auth {{ openvpn_key_dir }}/ta.key 0
+{% endif %}
+tls-server
+auth {{ openvpn_auth_alg | default('SHA256') }}
+cipher {{ openvpn_cipher }}
+{% if openvpn_tun_mtu %}
+tun-mtu {{ openvpn_tun_mtu }}
+{% endif %}
+{% if openvpn_use_hardened_tls|bool %}
+tls-version-min 1.2
+{% endif %}
+{# Using Mozilla's modern cipher list + DHE for older clients #}
+{% if openvpn_use_modern_tls|bool %}
+tls-cipher TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-256-CBC-SHA384:TLS-ECDHE-RSA-WITH-AES-256-CBC-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256
+{% endif %}
+{% if openvpn_duplicate_cn|bool %}
+duplicate-cn
+{% endif %}
+{% if openvpn_client_to_client|bool %}
+client-to-client
+{% endif %}
+
+server {{ openvpn_server_network }} {{ openvpn_server_netmask }}
+{% if openvpn_server_ipv6_network is defined %}
+server-ipv6 {{ openvpn_server_ipv6_network }}
+{% endif %}
+{% if openvpn_topology is defined %}
+topology {{ openvpn_topology }}
+{% endif %}
+ifconfig-pool-persist {{ openvpn_ifconfig_pool_persist_file }}
+{% if openvpn_client_config %}
+client-config-dir {{ openvpn_client_config_dir }}
+{% endif %}
+
+{% if openvpn_redirect_gateway|bool %}
+push "redirect-gateway def1 bypass-dhcp"
+{% endif %}
+{% if openvpn_set_dns %}
+{% if openvpn_custom_dns %}
+{% for srv in openvpn_dns_servers %}
+push "dhcp-option DNS {{ srv }}"
+{% endfor %}
+{% else %}
+push "dhcp-option DNS 1.0.0.1"
+push "dhcp-option DNS 1.1.1.1"
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
+{% endif %}
+{% endif %}
+{% if openvpn_push is defined %}
+{% for opt in openvpn_push %}
+push "{{ opt }}"
+{% endfor %}
+{% endif %}
+keepalive {{ openvpn_keepalive_ping }} {{ openvpn_keepalive_timeout }}
+{% if openvpn_compression is not undefined and openvpn_compression != "" %}
+compress {{ openvpn_compression }}
+{% endif %}
+persist-key
+persist-tun
+user {{ openvpn_service_user }}
+group {{ openvpn_service_group }}
+
+{% for option in openvpn_addl_server_options %}
+{{ option }}
+{% endfor %}
+
+status status-{{ openvpn_config_file }}.log
+status-version {{ openvpn_status_version }}
+log-append {{ openvpn_log_dir }}/{{ openvpn_log_file }}
+verb 3
+
+{% if openvpn_verify_cn|bool %}
+verify-x509-name OpenVPN-Client-{{ inventory_hostname[:24] }} name-prefix
+remote-cert-tls client
+{% endif %}
+
+{% if openvpn_enable_management|bool %}
+management {{ openvpn_management_bind }}
+{% if openvpn_management_client_user %}
+management-client-user {{ openvpn_management_client_user }}
+{% endif %}
+{% endif %}
+
+{% if openvpn_use_ldap|bool %}
+### LDAP AUTH ###
+{% if ansible_os_family == 'Debian' %}
+plugin /usr/lib/openvpn/openvpn-auth-ldap.so "{{ openvpn_base_dir }}/auth/ldap.conf"
+{% elif ansible_machine == "x86_64" %}
+plugin /usr/lib64/openvpn/plugin/lib/openvpn-auth-ldap.so "{{ openvpn_base_dir }}/auth/ldap.conf"
+{% else %}
+plugin /usr/lib/openvpn/plugin/lib/openvpn-auth-ldap.so "{{ openvpn_base_dir }}/auth/ldap.conf"
+{% endif %}
+{% if ldap.verify_client_cert is defined %}
+verify-client-cert {{ ldap.verify_client_cert }}
+{% else %}
+client-cert-not-required
+{% endif %}
+{% endif %}
+
+script-security {{ openvpn_script_security }}
+
+{% if openvpn_script_up is defined %}
+up {{ openvpn_base_dir }}/up.sh
+{% endif %}
+{% if openvpn_script_down is defined %}
+down {{ openvpn_base_dir }}/down.sh
+{% endif %}
+
+
+{% if openvpn_script_client_connect is defined %}
+client-connect {{ openvpn_base_dir }}/client_connect.sh
+{% endif %}
+{% if openvpn_script_client_disconnect is defined %}
+client-disconnect {{ openvpn_base_dir }}/client_disconnect.sh
+{% endif %}

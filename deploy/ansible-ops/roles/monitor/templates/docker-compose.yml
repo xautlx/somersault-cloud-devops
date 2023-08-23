@@ -1,0 +1,44 @@
+# 前台运行： docker compose up
+# 后台运行： docker compose up -d
+# 拉取新镜像运行： docker compose up -d --pull always
+# 删除容器： docker compose down
+# 清除异常容器： docker rm $(sudo docker ps -qf status=exited)
+# 清空失效镜像： docker rmi `docker images | grep '<none>' | awk '{print $3}'`
+
+# {% set nacos_addr = [] %}
+# {% for item in groups['nacos'] %}
+#   {{ nacos_addr.append("{}:{}".format(hostvars[item]['ansible_ssh_host'], hostvars[item]['nacos_port'])) }}
+# {% endfor %}
+
+version: "3"
+services:
+  "somersault-cloud-monitor":
+    image: "{{docker_image_repo | default('')}}somersault-cloud/monitor:{{docker_image_version}}"
+    container_name: "somersault-cloud-monitor"
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: "prod"
+      APP_DEBUG: 'n' # y=启动-Xdebug模式，n=关闭
+      ### 基础参数设置 ###
+      JAVA_OPTS: "{{java_opts}}"
+      CONTAINER_HOST_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
+      SERVER_PORT: {{monitor_port}}
+
+      ### Nacos环境变量参数设置 ###
+      # 开启Nacos注册和配置服务，一般默认配置true
+      NACOS_CONFIG_ENABLED: "true"
+      NACOS_DISCOVERY_ENABLED: "true"
+      # TODO: 暂未实现基于配置密码动态生成SQL脚本，密码为固定值或需要手工修改SQL脚本实现
+      NACOS_USERNAME: "somersault-cloud"
+      NACOS_PASSWORD: "P@ssword4Nacos"
+      # Nacos服务端连接地址，建议前置负载均衡配置为单一IP和端口
+      NACOS_SERVER_ADDR: "{{ nacos_addr |  join(',') }}"
+      # 按需配置命名空间，如果不做隔离规划可配置使用默认空间：public
+      NACOS_NAMESPACE: "somersault-cloud"
+      # 对于容器化部署需要指定当前宿主机IP地址，如果是直接主机部署则无需指定此变量
+      NACOS_DISCOVERY_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
+    ports:
+      - "{{monitor_port}}:{{monitor_port}}"
+      - "{{monitor_port | int + 55}}:9555" # Debug端口，默认按照服务端口偏移+55
+    volumes:
+      - ./logs:/root/logs

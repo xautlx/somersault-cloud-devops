@@ -1,0 +1,4 @@
+- hosts: apps_openresty
+  become: yes
+  roles:
+    - role: keepalived

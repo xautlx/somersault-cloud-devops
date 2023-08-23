@@ -1,0 +1,9 @@
+---
+- name: install ddns crontab
+  hosts: ddns
+  become: yes
+  roles:
+    - role: java
+      transport: repositories
+      java_major_version: 11
+    - role: ddns

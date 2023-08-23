@@ -1,0 +1,19 @@
+---
+
+- name: "select count(*) from somersault_cloud_system.system_users;"
+  shell: mysql -u"{{mysql_user}}" -p"{{mysql_passwd}}" -NBe "select count(*) from somersault_cloud_system.system_users;"
+  register: initdata_count
+  failed_when: false
+  when:
+    - hostvars[inventory_hostname]['mysql_master_vip'] is defined
+
+- name: result of select count(*) from somersault_cloud_system.system_users
+  debug:
+    msg: "{{initdata_count.stdout}}"
+  when:
+    - hostvars[inventory_hostname]['mysql_master_vip'] is defined
+
+- ansible.builtin.include_tasks: initdata.yml
+  when:
+    - hostvars[inventory_hostname]['mysql_master_vip'] is defined
+    - initdata_count.stdout == '' or initdata_count.stdout == '0'

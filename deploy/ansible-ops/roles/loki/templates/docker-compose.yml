@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  loki:
+    image: "{{docker_image_repo | default('')}}grafana/loki:{{loki_version}}"
+    container_name: loki
+    restart: always
+    ports:
+      - "{{loki_port}}:3100"
+      - "{{loki_grpc_port}}:9096"
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      # Loki中定义单租户的Loki系统中，fake为其默认租户名
+      - ./loki-rules.yml:/etc/loki/rules/fake/loki-rules.yml:ro
+    command: -config.file=/etc/loki/loki-config.yaml

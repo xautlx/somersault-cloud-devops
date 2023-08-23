@@ -1,0 +1,12 @@
+---
+#frpc_version: ''
+#frpc_config_name: ''
+
+# Use an existing config file;
+#frpc_config_file: ''
+
+# Or create a config file.
+frpc_server_addr: '127.0.0.1'
+frpc_server_port: 7000
+#frpc_token: ''
+#frpc_http_proxy: ''

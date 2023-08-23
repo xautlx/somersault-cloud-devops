@@ -1,0 +1,62 @@
+---
+- name: set_fact
+  set_fact:
+    install_tmp_dir: /tmp/ansible/tool_install
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{install_tmp_dir}}"
+
+- name: stop firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: stop selinux
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: SELINUX=disabled
+
+- name: set UseDNS no for /etc/ssh/sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '#UseDNS yes'
+    line: "UseDNS no"
+
+- name: unarchive rpm-packages
+  unarchive:
+    src: '{{role_path}}/files/tool-rpm-packages.tar'
+    dest: '{{install_tmp_dir}}'
+
+- name: rpm install rpm-packages
+  shell:
+    cmd: "rpm -Uvh *.rpm --nodeps --force "
+    chdir: "{{install_tmp_dir}}"
+  failed_when: false
+
+#- name: clear rpm-packages
+#  shell:
+#    cmd: "rm -f *.rpm"
+#    chdir: "{{install_tmp_dir}}"
+
+- name: setup hostname
+  shell:
+    cmd: '{{item}}'
+  loop:
+    - 'hostname {{inventory_hostname}}'
+    - 'echo {{inventory_hostname}} > /etc/hostname'
+  when: force_update_hostname | bool == True
+
+- name: setup /etc/hosts with server name
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '{{ item }}$'
+    line: '{{ hostvars[item].ansible_ssh_host }} {{ item }}'
+  with_items: "{{ groups['all'] }}"
+

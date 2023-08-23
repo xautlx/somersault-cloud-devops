@@ -1,0 +1,17 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    ansible_ssh_user: root
+  roles:
+    - role: sudoers
+    - role: authorized-key
+      authorized_key_list:
+        - name: "{{ app_user }}"
+          authorized_keys:
+            - key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        # 开发或测试环境为方便可以配置root免密；生产环境不建议开启root免密，通过app账号登录后按需sudo切换操作
+        - name: "root"
+          authorized_keys:
+            - key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+              state: present # 默认或present添加，absent移除；

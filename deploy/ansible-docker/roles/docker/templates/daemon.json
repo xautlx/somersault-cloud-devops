@@ -1,0 +1,19 @@
+{
+  "ipv6": false,
+  "insecure-registries": [
+    "{{docker_repo_addr}}"
+  ],
+  "registry-mirrors": [
+    "https://hmodyls1.mirror.aliyuncs.com",
+    "https://docker.mirrors.ustc.edu.cn/",
+    "https://hub-mirror.c.163.com",
+    "https://registry.docker-cn.com"
+  ],
+  "bip": "178.90.0.1/24",
+  "default-address-pools": [
+    {
+      "base": "{{docker_address_pools}}",
+      "size": 24
+    }
+  ]
+}

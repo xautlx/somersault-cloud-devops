@@ -1,0 +1,54 @@
+---
+- name: setup master vars
+  set_fact:
+    rocketmq_mqbroker_name: "{{inventory_hostname}}"
+    rocketmq_mqbroker_dirname: "broker-master-{{inventory_hostname}}"
+    rocketmq_mqbroker_dir: "{{rocketmq_dir}}/broker-master-{{inventory_hostname}}"
+  when:
+    - rocketmq_replication_type == 'master'
+
+- name: setup slave vars
+  set_fact:
+    rocketmq_mqbroker_name: "{{replicaof_broker_name}}"
+    rocketmq_mqbroker_dirname: "broker-slave-{{replicaof_broker_name}}"
+    rocketmq_mqbroker_dir: "{{rocketmq_dir}}/broker-slave-{{replicaof_broker_name}}"
+  when:
+    - rocketmq_replication_type == 'slave'
+
+- name: create conf dir
+  file:
+    path: "{{rocketmq_mqbroker_dir}}/{{item}}"
+    state: directory
+  loop:
+    - "conf"
+
+- name: create data dir
+  file:
+    path: "{{rocketmq_mqbroker_dir}}/{{item}}"
+    owner: "3000"
+    group: "3000"
+    state: directory
+  loop:
+    - "logs"
+    - "data"
+
+- name: copy docker files
+  template:
+    src: "docker-compose-mqbroker.yml"
+    dest: "{{rocketmq_mqbroker_dir}}/docker-compose.yml"
+
+- name: copy docker files
+  template:
+    src: "broker.conf"
+    dest: "{{rocketmq_mqbroker_dir}}/conf/broker.conf"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{rocketmq_mqbroker_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d "
+    chdir: "{{rocketmq_mqbroker_dir}}"

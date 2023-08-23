@@ -1,0 +1,60 @@
+---
+- name: disable docker service
+  shell: "systemctl disable docker"
+  retries: 3
+  failed_when: false
+
+- name: docker rm -f all docker containers
+  shell: "docker rm -f $(docker ps -qa)"
+  retries: 3
+  failed_when: false
+
+- name: docker rmi -f all docker images
+  shell: "docker rmi -f $(docker images -qa)"
+  retries: 3
+  failed_when: false
+
+- name: docker image prune -f -a
+  shell: "docker image prune -f -a"
+  retries: 3
+  failed_when: false
+
+- name: reboot host for docker system resource release
+  reboot:
+
+#- name: systemctl stop docker
+#  shell: "systemctl stop docker"
+#  retries: 3
+#  failed_when: false
+
+- name: remove all docker dir
+  file:
+    path: '{{ item }}'
+    state: absent
+  loop:
+    - "/etc/docker"
+    - "/run/docker"
+    - "/var/run/docker"
+    - "/var/lib/docker"
+#    - "/var/lib/dockershim"
+  retries: 3
+  ignore_errors: true
+
+# yum list installed|grep docker OR rpm -qa|grep docker
+- name: remove docker package
+  shell: "yum -y remove {{item}}"
+  loop:
+    - "containerd.io.x86_64"
+    - "docker-buildx-plugin.x86_64 "
+    - "docker-ce.x86_64"
+    - "docker-ce-cli.x86_64"
+    - "docker-ce-rootless-extras.x86_64"
+    - "docker-compose-plugin.x86_64"
+#    - "docker-scan-plugin.x86_64"
+  retries: 3
+  ignore_errors: true
+
+
+
+
+

@@ -1,0 +1,3 @@
+---
+# 和xxl-job默认端口冲突，微调端口号
+prometheus_port: 9092

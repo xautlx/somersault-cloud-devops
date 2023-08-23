@@ -1,0 +1,5 @@
+---
+monitor_data_dir: "/data/monitor"
+apps_nacos_config_dir: "{{monitor_data_dir}}/nacos"
+
+monitor_port: 48000

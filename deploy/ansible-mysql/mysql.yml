@@ -1,0 +1,9 @@
+# 基于 https://github.com/geerlingguy/ansible-role-mysql
+# 做必要变更：1，移除 mysql_log 相关代码；2，移除除root密码初始化以外的处理逻辑
+---
+- name: install mysql
+  hosts: mysql
+  become: yes
+  roles:
+    - role: mysql
+      when: mysql_install | bool == True

@@ -1,0 +1,3 @@
+---
+frp_tmp_dir: /tmp
+frp_systemd_dir: /usr/local/lib/systemd/system

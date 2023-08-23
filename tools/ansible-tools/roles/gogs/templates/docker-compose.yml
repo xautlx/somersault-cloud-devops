@@ -1,0 +1,18 @@
+# 前台运行： docker compose up
+# 后台运行： docker compose up -d
+# 重建容器运行： docker compose up -d --build
+# 显示构建信息运行： DOCKER_BUILDKIT=0  docker compose up -d --build
+# 删除容器： docker compose down
+version: "3.8"
+services:
+  gogs:
+    image: gogs/gogs:{{gogs_version}}
+    container_name: gogs
+    volumes:
+      - ./data:/data
+    ports:
+      - {{gogs_port}}:3000
+    environment:
+      JAVA_OPTS: "-Xms128m -Xmx256m"
+      TZ: Asia/Shanghai
+    restart: always

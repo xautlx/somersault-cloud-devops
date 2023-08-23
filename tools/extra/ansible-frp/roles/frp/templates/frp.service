@@ -1,0 +1,13 @@
+[Unit]
+Description = frp server
+After = network.target syslog.target
+Wants = network.target
+
+[Service]
+Type = simple
+ExecStart = {{frp_bin_dir}}/{{ component }} -c {{ frp_config_dir }}/{{ frp_service_name }}.ini
+User={{app_user if app_user is defined else 'app'}}
+Group={{app_group if app_group is defined else 'app'}}
+
+[Install]
+WantedBy = multi-user.target

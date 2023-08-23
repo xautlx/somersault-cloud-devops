@@ -1,0 +1,9 @@
+---
+apps_openresty_dir: "/tool/openresty"
+http_port: 80
+
+http_tunnel_vip: 192.168.1.222
+http_tunnel_port: 8888
+
+primary_download_url_prefix: http://tun6.entdiy.xyz:8888/
+secondary_download_url_prefix: http://124.71.2.242:8888/

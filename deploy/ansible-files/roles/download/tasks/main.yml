@@ -1,0 +1,29 @@
+---
+- name: Include download_package task
+  include_tasks: download_package.yml
+  vars:
+    package_file: "{{item}}"
+  loop: "{{package_files}}"
+
+- name: clear <none> images
+  shell: "docker rmi `docker images | grep '<none>' | awk '{print $3}'`"
+  failed_when: false
+
+- name: "docker login {{docker_pull_repo}}"
+  shell: "docker login -u {{docker_pull_repo_user}} -p {{docker_pull_repo_passwd}} {{docker_pull_repo}}"
+  register: docker_login_result
+  when: docker_pull_repo_passwd is defined
+
+- name: "show docker login result"
+  debug:
+    msg: "{{docker_login_result.stdout}}"
+  when: docker_pull_repo_passwd is defined
+
+- name: Include download_image task
+  include_tasks: download_image.yml
+  vars:
+    image_file: "{{item}}"
+  loop: "{{image_files}}"
+  when:
+    - docker_pull_repo_passwd is defined
+    - "'Login Succeeded' in docker_login_result.stdout"

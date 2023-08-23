@@ -1,0 +1,21 @@
+#{% set namesrv_hosts = [] %}
+#{% for item in groups['rocketmq_mqnamesrv'] %}
+#  {{  namesrv_hosts.append("{}:{}".format(hostvars[item]['ansible_ssh_host'], rocketmq_mqnamesrv_port)) }}
+#{% endfor %}
+
+version: '3'
+services:
+
+  # https://rocketmq.apache.org/docs/deploymentOperations/04Dashboard/
+  mqdashboard:
+    image: "{{docker_image_repo | default('')}}apacherocketmq/rocketmq-dashboard:1.0.0"
+    container_name: mqdashboard
+    restart: always
+    ports:
+      - "{{rocketmq_dashboard_port}}:8080"
+    volumes:
+      - ./data:/tmp/rocketmq-console/data # 数据目录映射, user.properties需要放在data目录下
+    environment:
+      - NAMESRV_ADDR={{ namesrv_hosts |  join(';') }}
+      # 开启登录认证: https://github.com/apache/rocketmq-dashboard/blob/master/docs/1_0_0/UserGuide_CN.md
+      - ROCKETMQ_CONFIG_LOGIN_REQUIRED=true

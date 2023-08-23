@@ -1,0 +1,6 @@
+---
+minio_dir: "/tool/minio"
+
+minio_service_port: "9000"
+minio_console_port: "9001"
+

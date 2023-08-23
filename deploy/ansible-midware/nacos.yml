@@ -1,0 +1,6 @@
+---
+- name: install nacos
+  hosts: nacos
+  become: yes
+  roles:
+    - role: nacos

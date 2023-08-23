@@ -1,0 +1,98 @@
+---
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{apps_openresty_dir}}/logs"
+    - "{{apps_openresty_dir}}/conf"
+    - "{{apps_openresty_dir}}/conf/conf.d"
+    - "{{apps_openresty_dir}}/conf/cert"
+    - "{{apps_openresty_dir}}/html"
+    - "{{apps_openresty_dir}}/html/download"
+    - "{{apps_openresty_dir}}/html/www"
+    - "{{apps_openresty_dir}}/html/images"
+    - "{{apps_openresty_dir}}/html/images/basic"
+    - "{{apps_openresty_dir}}/html/packages"
+    - "{{apps_openresty_dir}}/html/packages/devel"
+    - "{{apps_openresty_dir}}/html/packages/docker-ce"
+    - "{{apps_openresty_dir}}/html/packages/keepalived"
+    - "{{apps_openresty_dir}}/html/packages/mysql"
+    - "{{apps_openresty_dir}}/html/packages/node_exporter"
+    - "{{apps_openresty_dir}}/html/packages/tool"
+
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: download files
+  include_tasks: download.yml
+  vars:
+    download_file: "{{item}}"
+  loop:
+    - "packages/devel/devel-rpm-packages.tar"
+    - "packages/docker-ce/docker-ce-24.0.2-rpm-packages.tar"
+    - "packages/keepalived/keepalived-2.2.7.tar.gz"
+    - "packages/mysql/libaio-0.3.109-13.el7.x86_64.rpm"
+    - "packages/mysql/mysql-8.0.17.tar.gz"
+    - "packages/mysql/mysql-community-libs-compat-5.7.42-1.el7.x86_64.rpm"
+    - "packages/mysql/MySQL-python-1.2.5-1.el7.x86_64.rpm"
+    - "packages/node_exporter/node_exporter-1.4.1.linux-amd64.tar.gz"
+    - "packages/tool/tool-rpm-packages.tar"
+
+- name: copy html files
+  include_tasks: copy.yml
+  vars:
+    package_dir: "{{item}}"
+  loop:
+    - "html/www"
+    - "html/packages/devel"
+    - "html/packages/docker-ce"
+    - "html/packages/keepalived"
+    - "html/packages/mysql"
+    - "html/packages/node_exporter"
+    - "html/packages/tool"
+
+- name: copy conf files
+  template:
+    src: "{{ item }}"
+    dest: "{{apps_openresty_dir}}/conf/{{ item }}"
+  loop:
+    - nginx.conf
+
+- name: copy conf.d files
+  template:
+    src: "{{ item }}"
+    dest: "{{apps_openresty_dir}}/conf/conf.d/{{ item | basename }}"
+  with_fileglob:
+    - "templates/conf.d/*"
+
+- name: copy docker files
+  template:
+    src: "{{ item }}"
+    dest: "{{apps_openresty_dir}}/{{ item }}"
+  loop:
+    - docker-compose.yml
+
+- name: "docker login {{docker_repo_addr}}"
+  shell: "docker login -u {{docker_repo_user}} -p {{docker_repo_passwd}} {{docker_repo_addr}}"
+  when: docker_repo_passwd is defined
+  register: docker_login_result
+
+- name: "show docker login result"
+  debug:
+    msg: "{{docker_login_result.stdout}}"
+  when: docker_repo_passwd is defined
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{apps_openresty_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d "
+    chdir: "{{apps_openresty_dir}}"

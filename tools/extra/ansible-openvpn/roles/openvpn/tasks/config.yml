@@ -1,0 +1,103 @@
+---
+- name: Create openvpn config file
+  template:
+    src: server.conf.j2
+    dest: "{{ openvpn_base_dir }}/{{ openvpn_config_file }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - restart openvpn
+
+- name: Copy up script if defined
+  copy:
+    src: "{{ openvpn_script_up }}"
+    dest: "{{ openvpn_base_dir }}/up.sh"
+    mode: a+x
+  when: openvpn_script_up is defined
+
+- name: Copy down script if defined
+  copy:
+    src: "{{ openvpn_script_down }}"
+    dest: "{{ openvpn_base_dir }}/down.sh"
+    mode: a+x
+  when: openvpn_script_down is defined
+
+- name: Copy client-connect script if defined
+  copy:
+    src: "{{ openvpn_script_client_connect }}"
+    dest: "{{ openvpn_base_dir }}/client_connect.sh"
+    mode: a+x
+  when: openvpn_script_client_connect is defined
+
+- name: Copy client-disconnect script if defined
+  copy:
+    src: "{{ openvpn_script_client_disconnect }}"
+    dest: "{{ openvpn_base_dir }}/client_disconnect.sh"
+    mode: a+x
+  when: openvpn_script_client_disconnect is defined
+
+- name: Install LDAP config
+  template:
+    src: ldap.conf.j2
+    dest: "{{ openvpn_base_dir }}/auth/ldap.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  when: openvpn_use_ldap
+
+- name: Create log directory
+  file:
+    dest: "{{ openvpn_log_dir }}"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Copy openvpn logrotate config file
+  template:
+    src: openvpn_logrotate.conf.j2
+    dest: /etc/logrotate.d/openvpn-{{ openvpn_config_file }}.conf
+    owner: root
+    group: root
+    mode: 0400
+  when: ansible_os_family != 'Solaris'
+
+- name: Create client config directory
+  file:
+    state: directory
+    path: "{{ openvpn_base_dir }}/{{ openvpn_client_config_dir }}"
+    owner: root
+    group: root
+    mode: 0755
+  when: openvpn_client_config
+
+- name: Create client config directory
+  template:
+    src: client_ccd.j2
+    dest: "{{ openvpn_base_dir }}/{{ openvpn_client_config_dir }}/{{ item.key }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: openvpn_client_config
+  with_dict: "{{ openvpn_client_config_present }}"
+
+- name: Delete custom client config from client config directory
+  file:
+    path: "{{ openvpn_base_dir }}/{{ openvpn_client_config_dir }}/{{ item }}"
+    state: absent
+  when: openvpn_client_config
+  with_items: "{{ openvpn_client_config_absent }}"
+
+- name: Delete client config directory
+  file:
+    path: "{{ openvpn_base_dir }}/{{ openvpn_client_config_dir }}"
+    state: absent
+  when: not openvpn_client_config
+
+- name: Setup openvpn auto-start & start
+  service:
+    name: "{{ openvpn_service_name }}"
+    enabled: true
+    state: started
+  # Github Actions doesn't allow entrypoints, so PID 1 isn't an init system
+  when: ansible_service_mgr != "tail"

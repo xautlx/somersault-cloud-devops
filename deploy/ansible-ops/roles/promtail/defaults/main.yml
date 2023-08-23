@@ -1,0 +1,5 @@
+---
+promtail_version: "2.7.5"
+promtail_main_dir: "/data/promtail"
+log_group: "default"
+

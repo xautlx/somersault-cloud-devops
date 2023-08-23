@@ -1,0 +1,8 @@
+---
+- name: Check if jenkins file exists
+  stat:
+    path: "{{jenkins_dir}}/jobs"
+  register: jenkins_file_check
+
+- include_tasks: jenkins.yml
+  when: not jenkins_file_check.stat.exists

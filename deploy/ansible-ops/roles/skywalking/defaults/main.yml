@@ -1,0 +1,4 @@
+---
+skywalking_port: 11800
+skywalking_dir: "/data/skywalking"
+skywalking_version: 8.9.0

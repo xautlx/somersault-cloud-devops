@@ -1,0 +1,52 @@
+---
+- name: set_fact docker_image_repo
+  set_fact:
+    docker_image_repo: "{{docker_repo_addr}}/"
+  when: docker_repo_addr | default('') != ''
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{sentinel_dir}}/data"
+    - "{{sentinel_dir}}/conf"
+
+# 提取hosts中主节点IP地址为从节点指向主节点的参数
+- name: Get master host ip from hosts config
+  set_fact:
+    sentinel_master_name: "{{hostvars[item]['sentinel_master_name']}}"
+    redis_master_requirepass: "{{hostvars[item]['redis_requirepass']}}"
+    redis_master_host: "{{hostvars[item]['ansible_ssh_host']}}"
+    redis_master_port: "{{hostvars[item]['redis_port']}}"
+  when: hostvars[item]['sentinel_master_name'] is defined
+  with_items: "{{groups['redis']}}"
+
+- debug:
+    msg: "{{hostvars[inventory_hostname]['sentinel_master_name']}}"
+
+- name: copy docker files
+  template:
+    src: "{{ item }}"
+    dest: "{{sentinel_dir}}/{{ item }}"
+  loop:
+    - docker-compose.yml
+
+- name: copy sentinel conf file
+  template:
+    src: "{{ item }}"
+    dest: "{{sentinel_dir}}/conf/{{ item }}"
+  loop:
+    - sentinel.conf
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{sentinel_dir}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{sentinel_dir}}"

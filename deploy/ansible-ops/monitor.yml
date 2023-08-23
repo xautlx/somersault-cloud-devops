@@ -1,0 +1,6 @@
+---
+- name: install monitor
+  hosts: monitor
+  become: yes
+  roles:
+    - role: monitor

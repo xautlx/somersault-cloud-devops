@@ -1,0 +1,2 @@
+---
+iptables_save_command: "/etc/init.d/iptables-persistent save"

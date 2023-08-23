@@ -1,0 +1,59 @@
+---
+- name: Create {{ component }} directory
+  become: yes
+  file:
+    path: "{{ frp_bin_dir }}"
+    state: directory
+    owner: "{{app_user}}"
+    group: "{{app_group}}"
+    mode: "0755"
+  when: frp_outdated
+
+- name: Install {{ component }} bin
+  become: yes
+  copy:
+    remote_src: yes
+    src: "{{ frp_tmp_dir }}/{{ frp_release_name }}/{{ item }}"
+    dest: "{{ frp_bin_dir }}"
+    owner: "{{app_user}}"
+    group: "{{app_group}}"
+    mode: "0755"
+  notify: restart {{ component }}
+  with_items:
+    - "{{ component }}"
+  when: frp_outdated
+
+- name: Create frp config directory
+  become: yes
+  file:
+    path: "{{ frp_config_dir }}"
+    state: directory
+    mode: "0755"
+  when: frp_outdated
+
+- name: Install {{ component }} config
+  become: yes
+  copy:
+    remote_src: yes
+    src: "{{ frp_tmp_dir }}/{{ frp_release_name }}/{{ item }}"
+    dest: "{{ frp_config_dir }}"
+    owner: "{{app_user}}"
+    group: "{{app_group}}"
+    backup: yes
+  with_items:
+    - "{{ component }}.ini"
+    - "{{ component }}_full.ini"
+  when: frp_outdated
+
+- name: Create systemd service directory
+  become: yes
+  file:
+    path: "{{ frp_systemd_dir }}"
+    state: directory
+
+- name: Install {{ component }} systemd services
+  become: yes
+  template:
+    src: "frp.service"
+    dest: "{{ frp_systemd_dir }}/{{ frp_service_name }}.service"
+  notify: restart {{ component }}

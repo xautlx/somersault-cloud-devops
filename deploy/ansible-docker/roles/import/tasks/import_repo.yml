@@ -1,0 +1,21 @@
+---
+- name: "check: docker pull {{docker_repo_addr}}/{{image_file.repository}}:{{image_file.tag}}"
+  delegate_to: localhost
+  shell:
+    cmd: "docker pull {{docker_repo_addr}}/{{image_file.repository}}:{{image_file.tag}}"
+  register: docker_image_exist
+  failed_when: false
+  when:
+    - inventory_hostname == groups['docker'][0]
+
+- name: show docker_image_exist result
+  delegate_to: localhost
+  debug:
+    msg: "{{docker_image_exist.stdout}}"
+  when:
+    - inventory_hostname == groups['docker'][0]
+
+- include_tasks: import_repo_item.yml
+  when:
+    - inventory_hostname == groups['docker'][0]
+    - "'not found' in docker_image_exist.stdout or '' == docker_image_exist.stdout"

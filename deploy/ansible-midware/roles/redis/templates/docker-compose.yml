@@ -1,0 +1,34 @@
+version: '3'
+services:
+  redis:
+    container_name: redis
+    hostname: redis
+    image: "{{docker_image_repo | default('')}}redis:{{redis_version}}"
+    volumes:
+      - "./data:/data"
+      - "./redis.conf:/etc/redis/redis.conf"
+    environment:
+      TZ: "Asia/Shanghai"
+      LANG: en_US.UTF-8
+    ports:
+      - "{{redis_port}}:6379"
+    restart: always
+    command: #可通过 redis-cli 执行  info Replication 查看主从连接情况
+      redis-server /etc/redis/redis.conf  {% if hostvars[inventory_hostname]['ansible_ssh_host'] != redis_master_host %} --slaveof {{redis_master_host}} {{redis_master_port}}{% endif %}
+
+{% if groups['prometheus'] | length >= 1 %}
+
+  redis_exporter:
+    container_name: redis_exporter
+    image: "{{docker_image_repo | default('')}}oliver006/redis_exporter:v1.45.0"
+    environment:
+      TZ: "Asia/Shanghai"
+      REDIS_ADDR: "redis://redis:6379"
+      REDIS_PASSWORD: "{{redis_requirepass}}"
+    ports:
+      - "{{redis_exporter_port}}:9121"
+    restart: always
+    links:
+      - redis:redis
+
+{%  endif %}

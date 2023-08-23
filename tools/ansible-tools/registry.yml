@@ -1,0 +1,6 @@
+---
+- name: install registry service
+  hosts: registry
+  become: yes
+  roles:
+    - role: registry

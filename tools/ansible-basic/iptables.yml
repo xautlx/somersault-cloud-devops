@@ -1,0 +1,19 @@
+# dmesg -w 可滚动查看拦截日志
+---
+- name: install firewall/iptables
+  hosts: all
+  become: yes
+  roles:
+    - role: iptables
+      vars:
+        firewall_allowed_tcp_ports:
+          - "22"
+          - "25"
+          - "80"
+          - "443"
+          - "8888" # POC应用
+          - "4300" # OpenVPN
+        firewall_additional_rules:
+          - "iptables -A INPUT -p tcp -m tcp -s 192.168.1.0/24 -j ACCEPT" # 允许从内网段自由访问
+          - "iptables -A INPUT -p tcp -m tcp -s 172.16.0.0/16 -j ACCEPT" # 允许从容器网段自由访问
+          - "iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE" # for OpenVPN

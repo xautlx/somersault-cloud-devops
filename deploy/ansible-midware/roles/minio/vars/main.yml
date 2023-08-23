@@ -1,0 +1,5 @@
+---
+minio_version: "RELEASE.2023-06-02T23-17-26Z"
+
+minio_console_user: "admin"
+minio_console_passwd: "P@ssword4minio"

@@ -1,0 +1,7 @@
+---
+redis_version: "6.2.0"
+redis_port: "6379"
+redis_exporter_port: "9121"
+redis_requirepass: redis123456
+
+redis_dir: "/data/redis"

@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  grafana:
+    image: "{{docker_image_repo | default('')}}grafana/grafana:{{grafana_version}}"
+    container_name: grafana
+    restart: always
+    ports:
+      - "{{grafana_port}}:3000"
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data:/var/lib/grafana

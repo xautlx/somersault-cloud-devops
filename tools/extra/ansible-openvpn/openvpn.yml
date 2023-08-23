@@ -1,0 +1,23 @@
+---
+- name: install openvpn service
+  hosts: openvpn
+  gather_facts: true
+  roles:
+    - role: openvpn
+      # IPv6配置
+      openvpn_server_hostname: tun6.entdiy.xyz
+      # IPv4配置
+      #openvpn_server_hostname: tun.entdiy.xyz
+      # 配置指定IP段访问才走VPN，根据实际网络IP配置按需修改
+      openvpn_push:
+        - 'route 192.168.1.0 255.255.255.0 vpn_gateway'
+      openvpn_proto: tcp # 为了提高兼容不同路由器和网络运营商的限制从默认udp设置为tcp
+      openvpn_client_register_dns: false # only for windows
+      openvpn_dualstack: true # 设置false仅支持ipv4
+      # 已在 ansible-basic/iptables.yml 中添加转发策略
+      # iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE
+      manage_firewall_rules: false
+      openvpn_server_network: 10.8.0.0
+      openvpn_config_file: server
+      clients:
+        - "somersault-cloud"

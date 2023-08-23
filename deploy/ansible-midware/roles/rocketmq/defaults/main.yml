@@ -1,0 +1,5 @@
+---
+rocketmq_version: "4.9.4"
+rocketmq_dir: "/data/rocketmq"
+
+rocketmq_mqnamesrv_port: "9876"

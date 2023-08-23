@@ -1,0 +1,16 @@
+---
+- hosts: all
+  gather_facts: false
+  become: yes
+  vars:
+    - ansible_ssh_user: root
+  vars_prompt:
+    - name: confirm_clean
+      prompt: "Dangerous!!! Confirm CLEAR ALL package & data and REBOOT host? yes/no"
+      default: "no"
+      confirm: true
+      private: false
+  roles:
+    - role: clean-mysql
+    - role: clean-docker
+    - role: clean-data

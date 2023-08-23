@@ -1,0 +1,3 @@
+---
+java_opts: "-Xms128m -Xmx512m"
+docker_image_version: "1.0.0-snapshot"

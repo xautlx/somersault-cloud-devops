@@ -1,0 +1,6 @@
+---
+- import_playbook: mysql.yml
+- import_playbook: keepalived.yml
+- import_playbook: replication.yml
+- import_playbook: initdb.yml
+- import_playbook: initdata.yml
