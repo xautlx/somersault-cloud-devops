@@ -6,8 +6,8 @@
 # 清空失效镜像： docker rmi `docker images | grep '<none>' | awk '{print $3}'`
 version: "3"
 services:
-  somersault-cloud-openresty:
-    container_name: somersault-cloud-openresty
+  openresty:
+    container_name: openresty
     image: "{{docker_image_repo | default('')}}somersault-cloud/openresty:1.0.0-snapshot"
     restart: always
     ports:

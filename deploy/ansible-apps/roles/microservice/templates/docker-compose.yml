@@ -2,7 +2,7 @@
 # 后台运行： docker compose up -d
 # 拉取新镜像运行： docker compose up -d --pull always
 # 删除容器： docker compose down
-# 清除异常容器： docker rm $(sudo docker ps -qf status=exited)
+# 清除异常容器： docker rm $(docker ps -qf status=exited)
 # 清空失效镜像： docker rmi `docker images | grep '<none>' | awk '{print $3}'`
 
 # {% set nacos_addr = [] %}
@@ -19,7 +19,11 @@ version: "3"
 services:
   "{{service_name}}-{{service_port}}":
     image: "{{docker_image_repo | default('')}}{{service_port_config.docker_image_name}}:{{service_port_config.docker_image_version}}"
-    container_name: "{{service_name}}-{{service_port}}"
+{% if service_port_config.replicas | int > 1 %}
+    container_name: "{{service_port_config.service_id}}-{{service_port}}"
+{% else %}
+    container_name: "{{service_port_config.service_id}}"
+{% endif %}
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: "prod"
@@ -28,8 +32,11 @@ services:
       JAVA_OPTS: "{{service_port_config.java_opts}}"
       CONTAINER_HOST_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
       SERVER_PORT: {{service_port}}
-      # /actuator管理服务端口与应用服务端口分离，提高安全性：按照服务端口偏移+10
-      MANAGEMENT_SERVER_PORT: {{service_port | int +10}}
+      # /actuator管理服务端口与应用服务端口分离，提高安全性：按照服务端口偏移+1
+      MANAGEMENT_SERVER_PORT: {{service_port | int + 1}}
+      # y=开启remote debug，n=关闭
+      APP_DEBUG: 'n'
+      DEBUG_PORT: {{service_port | int + 3}}
 
       ### Nacos环境变量参数设置 ###
       # 开启Nacos注册和配置服务，一般默认配置true
@@ -46,7 +53,7 @@ services:
       NACOS_DISCOVERY_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
 
       XXL_JOB_EXECUTOR_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
-      XXL_JOB_EXECUTOR_PORT: "{{service_port | int +20}}" # 各个服务按照服务端口偏移+20
+      XXL_JOB_EXECUTOR_PORT: "{{service_port | int + 2}}" # 各个服务按照服务端口偏移+2
 {% if groups['skywalking'] | length >= 1 %}
       # 开启 SkyWalking Agent 配置，agent jar已在Dockerfile中定义置入
       JAVA_AGENT: "-javaagent:/app/skywalking/skywalking-agent.jar"
@@ -56,8 +63,8 @@ services:
 {% endif %}
     ports:
       - "{{service_port}}:{{service_port}}"
-      - "{{service_port | int + 55}}:9555" # Debug端口，默认按照服务端口偏移+55
-      - "{{service_port | int + 10}}:{{service_port | int + 10}}" # /actuator管理服务端口与应用服务端口分离，提高安全性：按照服务端口偏移+10
-      - "{{service_port | int + 20}}:{{service_port | int + 20}}" # XXL-JOB执行器回调端口，默认按照服务端口偏移+20
+      - "{{service_port | int + 1}}:{{service_port | int + 1}}" # /actuator管理服务端口与应用服务端口分离，提高安全性：按照服务端口偏移+1
+      - "{{service_port | int + 2}}:{{service_port | int + 2}}" # XXL-JOB执行器回调端口，默认按照服务端口偏移+2
+      - "{{service_port | int + 3}}:{{service_port | int + 3}}" # Debug端口，默认按照服务端口偏移+3
     volumes:
       - ../logs/{{service_port}}:/root/logs

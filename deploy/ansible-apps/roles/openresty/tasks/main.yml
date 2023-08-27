@@ -9,8 +9,6 @@
     - "{{apps_openresty_dir}}/conf"
     - "{{apps_openresty_dir}}/conf/conf.d"
     - "{{apps_openresty_dir}}/conf/cert"
-    - "{{apps_openresty_dir}}/html"
-    - "{{apps_openresty_dir}}/html/www"
 
 - name: set_fact docker_image_repo
   set_fact:
@@ -27,13 +25,6 @@
   set_fact:
     api_url_prefix_target: "{{api_url_prefix}}"
   when: api_url_prefix is defined
-
-- name: copy html files
-  copy:
-    src: "{{ item }}"
-    dest: "{{apps_openresty_dir}}/{{ item }}"
-  loop:
-    - html/www/index.html
 
 - name: copy conf files
   template:

@@ -100,7 +100,7 @@
 
 - name: Get monitor dashboard addr from hosts config
   set_fact:
-    monitor_dashboard_addr: "{{hostvars[item]['ansible_ssh_host']}}:{{hostvars[item]['monitor_port']}}"
+    monitor_dashboard_addr: "{{openresty_vip_addr}}"
   when: hostvars[item]['monitor_port'] is defined
   with_items: "{{groups['monitor'] | default([])}}"
   failed_when: false

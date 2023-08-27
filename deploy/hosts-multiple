@@ -135,9 +135,9 @@ server03 monitor_port=48000
 server02 openresty_keepalived_vip=192.168.1.222
 server03
 [apps_openresty:vars]
-http_port=8888
-#https_port=8443
-dashboard_admin_port=9999
+http_port=80
+#https_port=443
+dashboard_admin_port=88
 
 [apps_microservice]
 server01

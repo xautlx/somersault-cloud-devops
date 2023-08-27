@@ -14,7 +14,7 @@ version: "3"
 services:
   "somersault-cloud-monitor":
     image: "{{docker_image_repo | default('')}}somersault-cloud/monitor:{{docker_image_version}}"
-    container_name: "somersault-cloud-monitor"
+    container_name: "monitor"
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: "prod"

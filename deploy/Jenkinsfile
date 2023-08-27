@@ -22,7 +22,7 @@ pipeline {
      }
 
     environment {
-        GIT_PROJECT_ADDR="http://192.168.1.199:3000/entdiy.xyz/somersault-cloud-devops.git"
+        GIT_PROJECT_ADDR="http://192.168.1.199:3000/entdiy/somersault-cloud-devops.git"
     }
 
     stages {
