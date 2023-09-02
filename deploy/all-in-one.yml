@@ -1,5 +1,6 @@
 ---
 - import_playbook: ansible-basic/startup.yml
+- import_playbook: ansible-files/files-download.yml
 - import_playbook: ansible-files/files-link.yml
 - import_playbook: ansible-basic/system.yml
 - import_playbook: ansible-ops/iptables.yml

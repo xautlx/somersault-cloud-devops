@@ -17,28 +17,11 @@
     mode: 0775
   when: download_file_result.stat.exists == False
 
-- name: "primary download file {{download_file}} "
-  delegate_to: localhost
-  become: false
-  #failed_when: false
-  get_url:
-    url: "{{primary_download_url_prefix}}{{download_file}}"
-    dest: "{{dest_file}}"
-    mode: "0755"
-  when: download_file_result.stat.exists == False
-
-- name: Check secondary package_file exists
-  delegate_to: localhost
-  become: false
-  stat:
-    path: "{{dest_file}}"
-  register: download_file_result
-
-- name: "secondary download file {{download_file}}"
+- name: "download file {{download_file}} "
   delegate_to: localhost
   become: false
   get_url:
-    url: "{{secondary_download_url_prefix}}{{download_file}}"
+    url: "{{download_url_prefix}}{{download_file}}"
     dest: "{{dest_file}}"
     mode: "0755"
   when: download_file_result.stat.exists == False

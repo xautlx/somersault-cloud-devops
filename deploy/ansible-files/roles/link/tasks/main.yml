@@ -10,6 +10,3 @@
   vars:
     image_file: "{{item}}"
   loop: "{{image_files}}"
-
-- name: Include link_sql task
-  include_tasks: link_sql.yml

@@ -109,9 +109,9 @@ server00 monitor_port=48000
 [apps_openresty]
 server00
 [apps_openresty:vars]
-http_port=80
+http_port=8888
 #https_port=443
-dashboard_admin_port=88
+dashboard_admin_port=9999
 
 [apps_microservice]
 server00

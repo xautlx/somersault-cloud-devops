@@ -67,4 +67,5 @@ services:
       - "{{service_port | int + 2}}:{{service_port | int + 2}}" # XXL-JOB执行器回调端口，默认按照服务端口偏移+2
       - "{{service_port | int + 3}}:{{service_port | int + 3}}" # Debug端口，默认按照服务端口偏移+3
     volumes:
+      - ./tongweb:/app/tongweb
       - ../logs/{{service_port}}:/root/logs

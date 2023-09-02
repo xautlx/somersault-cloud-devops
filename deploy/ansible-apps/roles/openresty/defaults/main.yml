@@ -1,4 +1,2 @@
 ---
 apps_openresty_dir: "/data/openresty"
-http_port: 80
-https_port: 443

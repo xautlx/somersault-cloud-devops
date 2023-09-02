@@ -11,7 +11,8 @@
           - "25"
           - "80"
           - "443"
-          - "8888" # POC应用
+          - "8888" # POC应用站点
+          - "8800" # DOC文档站点
           - "4300" # OpenVPN
         firewall_additional_rules:
           - "iptables -A INPUT -p tcp -m tcp -s 192.168.1.0/24 -j ACCEPT" # 允许从内网段自由访问

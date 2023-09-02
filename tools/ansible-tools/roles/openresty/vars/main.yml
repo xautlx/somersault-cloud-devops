@@ -1,2 +1,5 @@
 ---
+http_port: 80
+
+download_url_prefix: http://doc.entdiy.xyz:8800/
 

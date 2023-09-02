@@ -11,9 +11,7 @@ services:
     # https://mirrors.tuna.tsinghua.edu.cn/help/debian/
     image: "openresty/openresty:1.21.4.1-0-bullseye-fat"
     restart: always
-    ports:
-      - "{{http_port}}:{{http_port}}"
-      - "{{http_tunnel_port}}:{{http_tunnel_port}}"
+    network_mode: host
     volumes:
       - ./conf/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
       - ./conf/conf.d:/etc/nginx/conf.d

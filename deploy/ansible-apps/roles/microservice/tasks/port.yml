@@ -3,7 +3,7 @@
   set_fact:
     service_name: "{{service_port_config.name}}"
     service_port: "{{service_port_number}}"
-    service_port_dir: "{{apps_microservice_dir}}/{{service_port_config.name}}/{{service_port_number}}"
+    service_port_dir: "{{apps_microservice_dir}}/{{service_port_config.service_id}}/{{service_port_number}}"
 
 - name: "create data dir for {{service_name+':'+ service_port}}"
   file:
@@ -12,6 +12,7 @@
     state: directory
   loop:
     - "{{service_port_dir}}/logs"
+    - "{{service_port_dir}}/tongweb"
   loop_control:
     loop_var: dir_to_create
 
@@ -24,6 +25,15 @@
     - docker-compose.yml
   loop_control:
     loop_var: file_to_create
+
+- name: copy tongweb files
+  copy:
+    src: '{{tongweb_file}}'
+    dest: "{{service_port_dir}}/tongweb/{{tongweb_file | basename}}"
+  with_fileglob:
+    - "files/tongweb/*"
+  loop_control:
+    loop_var: tongweb_file
 
 - name: docker compose down
   shell:
@@ -44,6 +54,6 @@
     force: true
   when:
     - prometheus_file_sd_configs_dir is defined
-    - service_port_config.disabled == false and service_port_config.name != 'somersault-cloud-gateway'
+    - service_port_config.disabled == false and service_port_config.service_id != 'gateway-server'
   delegate_to: localhost
   become: false

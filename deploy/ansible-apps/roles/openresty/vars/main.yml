@@ -1,4 +1,4 @@
 ---
-http_port: 80
-https_port: 443
+http_port: 8888
+https_port: 8443
 

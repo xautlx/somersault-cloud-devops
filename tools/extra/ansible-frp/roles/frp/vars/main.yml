@@ -1,5 +1,6 @@
 ---
 frp_token: P@sswd4frp
+frps_subdomain_host: t.entdiy.xyz
 
 frps_version: 0.44.0
 frpc_version: "{{frps_version}}"
