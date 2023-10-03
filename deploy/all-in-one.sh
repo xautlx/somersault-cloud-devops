@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s expand_aliases
+source /etc/profile.d/ansbile-alias.sh
 CUR_DIR="$(pwd)"
 SHELL_DIR="$(cd "$(dirname "$0")" && pwd)"
 #echo "CD to ${SHELL_DIR} dir to execute scripts"

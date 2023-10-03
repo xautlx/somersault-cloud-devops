@@ -87,10 +87,9 @@ RUN apt install ./dive_0.9.2_linux_amd64.deb
 #RUN sed -i "s#https://updates.jenkins.io/download#https://mirrors.tuna.tsinghua.edu.cn/jenkins#g" /var/jenkins_home/updates/default.json
 #RUN sed -i "s#http://www.google.com#https://www.baidu.com#g" /var/jenkins_home/updates/default.json
 
-ENV JENKINS_UC https://updates.jenkins-zh.cn
+ENV JENKINS_UC https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates
 ENV JENKINS_UC_DOWNLOAD https://mirrors.tuna.tsinghua.edu.cn/jenkins
-ENV JENKINS_OPTS="-Dhudson.model.UpdateCenter.updateCenterUrl=https://updates.jenkins-zh.cn/update-center.json"
-ENV JENKINS_OPTS="-Djenkins.install.runSetupWizard=false"
+ENV JENKINS_OPTS "-Dhudson.model.UpdateCenter.updateCenterUrl=https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json -Djenkins.install.runSetupWizard=false"
 
 COPY --chown=jenkins:jenkins plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli -f /usr/share/jenkins/ref/plugins.txt

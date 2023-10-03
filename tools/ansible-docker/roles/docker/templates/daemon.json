@@ -3,6 +3,10 @@
   "insecure-registries": [
     "{{hostvars[groups['registry'][0]]['ansible_default_ipv4']['address']}}:{{hostvars[groups['registry'][0]]['registry_port']}}"
   ],
+  "experimental": true,
+  "features": {
+    "buildkit": true
+  },
   "dns": ["8.8.8.8", "114.114.114.114"],
   "registry-mirrors": [
     "https://hmodyls1.mirror.aliyuncs.com",

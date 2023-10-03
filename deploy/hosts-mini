@@ -122,23 +122,18 @@ xxl_job_access_token=XxlJobToken4somersault_cloud
 
 ############# Loki 主机列表 #############
 [loki]
-server00 loki_port=3100
 
 ############# Grafana 主机列表 #############
 [grafana]
-server00 grafana_port=3000 grafana_admin_password=P@ssword4Grafana
 
 ############# Alertmanager 主机列表 #############
 [alertmanager]
-server00 alertmanager_port=9093
 
 ############# Prometheus 主机列表 #############
 [prometheus]
-server00 prometheus_port=9092 prometheus_file_sd_configs_dir=/data/file_sd_configs
 
 ############# Skywalking 主机列表 #############
 [skywalking]
-server00 skywalking_port=11800 skywalking_ui_port=11888
 
 ############# Druid、Spring Boot Admin 监控主机列表 #############
 [monitor]

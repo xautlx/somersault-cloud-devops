@@ -26,34 +26,33 @@
   set_fact:
     docker_image_repo: "{{docker_repo_addr}}/"
   when: docker_repo_addr | default('') != ''
-#
-#- name: download files
-#  include_tasks: download.yml
-#  vars:
-#    download_file: "{{item}}"
-#  loop:
-#    - "packages/devel/devel-rpm-packages.tar"
-#    - "packages/docker-ce/docker-ce-24.0.2-rpm-packages.tar"
-#    - "packages/keepalived/keepalived-2.2.7.tar.gz"
-#    - "packages/mysql/libaio-0.3.109-13.el7.x86_64.rpm"
-#    - "packages/mysql/mysql-8.0.17.tar.gz"
-#    - "packages/mysql/mysql-community-libs-compat-5.7.42-1.el7.x86_64.rpm"
-#    - "packages/mysql/MySQL-python-1.2.5-1.el7.x86_64.rpm"
-#    - "packages/node_exporter/node_exporter-1.4.1.linux-amd64.tar.gz"
-#    - "packages/tool/tool-rpm-packages.tar"
-#
-#- name: copy html files
-#  include_tasks: copy.yml
-#  vars:
-#    package_dir: "{{item}}"
-#  loop:
-#    - "html/www"
-#    - "html/packages/devel"
-#    - "html/packages/docker-ce"
-#    - "html/packages/keepalived"
-#    - "html/packages/mysql"
-#    - "html/packages/node_exporter"
-#    - "html/packages/tool"
+
+- name: download files
+  include_tasks: download.yml
+  vars:
+    download_file: "{{item}}"
+  loop:
+    - "packages/devel/devel-rpm-packages-{{ansible_architecture}}.tar"
+    - "packages/docker-ce/docker-ce-24.0.2-rpm-packages-{{ansible_architecture}}.tar"
+    - "packages/keepalived/keepalived-2.2.7.tar.gz"
+    - "packages/mysql/libaio-0.3.109-13.el7.x86_64.rpm"
+    - "packages/mysql/mysql-8.0.34-linux-glibc2.17-{{ansible_architecture}}.tar.gz"
+    - "packages/mysql/mysql-community-libs-compat-5.7.42-1.el7.x86_64.rpm"
+    - "packages/node_exporter/node_exporter-1.4.1.linux-amd64.tar.gz"
+    - "packages/tool/tool-rpm-packages-{{ansible_architecture}}.tar"
+
+- name: copy html files
+  include_tasks: copy.yml
+  vars:
+    package_dir: "{{item}}"
+  loop:
+    - "html/www"
+    - "html/packages/devel"
+    - "html/packages/docker-ce"
+    - "html/packages/keepalived"
+    - "html/packages/mysql"
+    - "html/packages/node_exporter"
+    - "html/packages/tool"
 
 - name: copy conf files
   template:

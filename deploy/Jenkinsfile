@@ -4,6 +4,10 @@ pipeline {
     agent any
      parameters {
 
+           choice       name: 'deploy_target',
+                        choices: ['microservice', 'frontend'],
+                        description:"更新部署类型"
+
            booleanParam name:"microservice_deploy",
                         defaultValue: false,
                         description:"是否触发 后端服务 更新部署"
@@ -47,7 +51,7 @@ pipeline {
 
         stage ('Microservice Ansible Deploy') {
             when{
-                equals actual: "${params.microservice_deploy}" ,expected:"true"
+                equals actual: "${params.deploy_target}" ,expected:"microservice"
             }
             steps{
                 sh "ansible-playbook -i deploy/${params.ansible_hosts} deploy/ansible-apps/microservice.yml"
@@ -57,7 +61,7 @@ pipeline {
 
         stage ('Frontend Ansible Deploy') {
             when{
-                equals actual: "${params.frontend_deploy}" ,expected:"true"
+                equals actual: "${params.deploy_target}" ,expected:"frontend"
             }
             steps{
                 sh "ansible-playbook -i deploy/${params.ansible_hosts} deploy/ansible-apps/openresty.yml"

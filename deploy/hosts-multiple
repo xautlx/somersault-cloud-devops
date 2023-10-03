@@ -10,12 +10,42 @@ ansible_ssh_user=app
 dashboard_admin_passwd=P@ssword4Admin
 # 指定iptables放行管理端口访问的来源IP段
 dashboard_admin_ops_hosts=192.168.0.0/16
-# 可选参数：如果提供此参数，则脚本会自动处理tar镜像文件push到对应私服，生成的docker-compose.yml部署配置文件追加私服前缀
+# 是否通过iptables屏蔽内网段以外的80和443端口出站请求从而模拟纯内网环境
+iptables_block_internet=true
+
 # 如果注释此参数，则不做私服相关处理，直接上传tar文件到各个docker主机做load加载本地镜像
 docker_repo_addr=192.168.1.199:5000
+docker_repo_insecure=true
 # 目标环境docker私服login账密，一般pull不需要，但是push推送镜像需要提供
 docker_repo_user=docker
 docker_repo_passwd=RepoP@ssword4Docker
+
+# 前端PC/H5资源包OpenResty/Nginx镜像版本
+web_server_version="master"
+# 后端SpringCloud微服务镜像版本
+system_server_version="master"
+infra_server_version="master"
+bpm_server_version="master"
+report_server_version="master"
+iot_server_version="master"
+gateway_server_version="master"
+monitor_server_version="master"
+
+mysql_version=8.0.34
+redis_version=6.2.0
+rocketmq_version=4.9.4
+rocketmq_dashboard_version=1.0.0-alpine
+nacos_server_version=v2.2.1-slim
+xxl_job_admin_version=2.4.0
+prometheus_version=v2.37.3
+alertmanager_version=v0.24.0
+webhook_dingtalk_version=v2.1.0
+grafana_version=8.5.24
+loki_version=2.7.5
+promtail_version=2.7.5
+mysqld_exporter_version=v0.14.0
+redis_exporter_version=v1.45.0
+skywalking_version=8.9.0
 
 ############# Docker 主机列表 #############
 # 除MySQL以外基本都是Docker容器运行，因此一般情况所有主机均安装docker运行环境
@@ -41,7 +71,8 @@ mysql_root_password=MySQLP@ssword4root
 #注释此项则默认root账号localhost访问，如果需要其他主机访问管理则按需设置此属性值
 mysql_root_host=192.168.%
 
-mysql_user=somersault_cloud
+# 数据库用户名称不使用下划线
+mysql_user=somersault-cloud
 mysql_passwd=MySQLP@ssword4somersault_cloud
 # 按需修改为安全访问网段
 mysql_user_host=192.168.%
@@ -49,7 +80,7 @@ mysql_user_host=192.168.%
 mysql_replication_name=repl
 mysql_replication_passwd=MySQLP@ssword4repl
 
-mysql_prom_exporter_name=prom_exporter
+mysql_prom_exporter_name=prom-exporter
 mysql_prom_exporter_passwd=MySQLP@ssword4exporter
 mysql_prom_exporter_port=9104
 
@@ -100,7 +131,7 @@ nacos_passwd=P@ssword4NacosAdmin
 server02
 server03
 [xxl_job:vars]
-xxl_job_port=9090
+xxl_job_port=9091
 xxl_job_admin_user=admin
 # 请勿随意修改，需要同步更新 25-init-xxl-job.sql 脚本中加密值
 xxl_job_admin_passwd=P@ssword4XxlJobAdmin
@@ -146,3 +177,4 @@ server02
 gateway_port=48080
 # 生产环境部署强烈建议设置为false关闭Swagger避免安全风险
 springdoc_swagger_enabled=true
+

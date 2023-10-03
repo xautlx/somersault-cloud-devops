@@ -4,6 +4,7 @@
     path: "{{item}}"
     state: directory
   loop:
+    - "{{jenkins_dir}}/docker"
     - "{{jenkins_dir}}/data/jenkins/jobs"
     - "{{jenkins_dir}}/data/jenkins/plugins"
 
@@ -16,12 +17,11 @@
 - name: copy docker files
   template:
     src: "{{item}}"
-    dest: "{{jenkins_dir}}/{{item}}"
+    dest: "{{jenkins_dir}}/docker/{{item}}"
   loop:
     - "docker-compose.yml"
     - "Dockerfile"
     - "plugins.txt"
-    - ".dockerignore"
 
 - name: "docker images | grep 'jenkins/jenkins-x' | grep '{{jenkins_version}}' | wc -l"
   shell: "docker images | grep 'jenkins/jenkins-x' | grep '{{jenkins_version}}' | wc -l"
