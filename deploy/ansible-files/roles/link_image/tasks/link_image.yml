@@ -1,0 +1,30 @@
+---
+#- name: copy file to target
+#  copy:
+#    src: "{{role_path}}/files/{{download_file.source}}"
+#    dest: "{{role_path}}/../../../{{file_path}}"
+#  loop: "{{ download_file.targets }}"
+#  loop_control:
+#    loop_var: file_path
+#  tags: delivery
+
+- name: set_fact
+  set_fact:
+    image_file_dir: "{{role_path}}/../../files/images/{{image_file.type}}"
+    image_file_name: "{{image_file.repository | basename}}-{{image_file.tag}}-{{image_arch}}.tar"
+
+- name: create images dir path
+  file:
+    path: "{{image_file_dir}}"
+    mode: "0755"
+    state: directory
+
+- name: get images dir path
+  shell:
+    cmd: "pwd"
+    chdir: "{{image_file_dir}}"
+  register: images_dir
+
+- name: link to images files
+  shell:
+    cmd: "ln -sf {{images_dir.stdout}}/{{image_file_name}} {{role_path}}/../../../{{image_files_target}}/{{image_file_name}} "

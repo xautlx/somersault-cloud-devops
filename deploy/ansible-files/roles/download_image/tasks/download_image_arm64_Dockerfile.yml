@@ -1,0 +1,31 @@
+---
+- name: set_fact
+  set_fact:
+    random_dir: "{{ 99999999 | random | to_uuid }}"
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "/tmp/{{random_dir}}"
+
+- name: "copy Dockerfile for {{image_file_name}}"
+  template:
+    src: "{{image_file.repository | basename}}/Dockerfile"
+    dest: "/tmp/{{random_dir}}/Dockerfile"
+
+- name: "docker buildx create --name=march_container --driver=docker-container"
+  shell:
+    cmd: "docker buildx create --name=march_container --driver=docker-container --use --bootstrap"
+  failed_when: false
+
+# // https://docs.docker.com/engine/reference/commandline/buildx_build/
+- name: "docker buildx build for {{image_file_name}}"
+  shell:
+    cmd: "{{item}}"
+    chdir: "{{image_file_dir}}"
+  loop:
+    - "docker buildx build --platform linux/arm64 -t {{image_full_tag}} -o type=docker,dest=- /tmp/{{random_dir}}/. > {{image_file_name}}.tmp"
+    - "mv {{image_file_name}}.tmp {{image_file_name}}"

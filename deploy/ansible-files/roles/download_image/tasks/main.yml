@@ -1,0 +1,62 @@
+---
+- name: clear <none> images
+  shell: "docker rmi `docker images | grep '<none>' | awk '{print $3}'`"
+  failed_when: false
+
+- name: "create images files dir"
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{role_path}}/../../files/images/basic"
+    - "{{role_path}}/../../files/images/apps"
+
+- name: list basic dir
+  shell:
+    cmd: "ls {{role_path}}/../../files/images/basic"
+  register: basic_dir_list
+
+- name: list apps dir
+  shell:
+    cmd: "ls {{role_path}}/../../files/images/apps"
+  register: apps_dir_list
+
+- name: set_fact image_files_exist
+  set_fact:
+    image_files_exist: "{{basic_dir_list.stdout_lines + apps_dir_list.stdout_lines}}"
+
+- name: list dir
+  debug:
+    msg: "{{ image_files_exist | join(' ') }}"
+
+- name: "docker login {{docker_pull_repo}}"
+  shell: "docker login -u {{docker_pull_repo_user}} -p {{docker_pull_repo_passwd}} {{docker_pull_repo}}"
+  register: docker_login_result
+  when: docker_pull_repo_passwd is defined
+
+- name: "show docker login result"
+  debug:
+    msg: "{{docker_login_result.stdout}}"
+
+- name: Include download_image task for amd64
+  include_tasks: download_image_amd64.yml
+  vars:
+    image_file: "{{item}}"
+  loop: "{{image_files}}"
+  when:
+    - docker_pull_repo_passwd is defined
+    - "'Login Succeeded' in docker_login_result.stdout"
+    - "target_ansible_architecture == 'all' or target_ansible_architecture == 'x86_64'"
+    - "'{{image_file.repository | basename}}-{{image_file.tag}}-x86_64.tar' not in image_files_exist"
+
+- name: Include download_image task for arm64
+  include_tasks: download_image_arm64.yml
+  vars:
+    image_file: "{{item}}"
+  loop: "{{image_files}}"
+  when:
+    - docker_pull_repo_passwd is defined
+    - "'Login Succeeded' in docker_login_result.stdout"
+    - "target_ansible_architecture == 'all' or target_ansible_architecture == 'aarch64'"
+    - "'{{image_file.repository | basename}}-{{image_file.tag}}-aarch64.tar' not in image_files_exist"

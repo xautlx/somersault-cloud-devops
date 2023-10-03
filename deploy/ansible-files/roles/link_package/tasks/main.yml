@@ -1,0 +1,6 @@
+---
+- name: Include link_package task
+  include_tasks: link_package.yml
+  vars:
+    package_file: "{{item}}"
+  loop: "{{package_files}}"

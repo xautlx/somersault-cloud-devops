@@ -1,3 +1,0 @@
----
-- include_tasks: link_sql_msql.yml
-  when: groups['mysql'] | length > 0

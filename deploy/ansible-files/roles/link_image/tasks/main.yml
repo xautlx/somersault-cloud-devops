@@ -1,0 +1,14 @@
+---
+- name: Include link_image task for x86_64
+  include_tasks: link_image.yml
+  vars:
+    image_arch: "x86_64"
+    image_file: "{{item}}"
+  loop: "{{image_files}}"
+
+- name: Include link_image task for aarch64
+  include_tasks: link_image.yml
+  vars:
+    image_arch: "aarch64"
+    image_file: "{{item}}"
+  loop: "{{image_files}}"

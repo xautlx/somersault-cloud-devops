@@ -5,54 +5,59 @@ files_get_url_prefix: http://192.168.1.199
 # 拉取部署源镜像的Docker私服地址，注意不是部署目标环境的私服地址
 # 如果私服pull有鉴权，请注意在ansible中控机提前进行docker login登录操作，确保能正常docker pull拉取镜像
 docker_pull_repo: 192.168.1.199:5000
+docker_pull_repo_user: docker
+docker_pull_repo_passwd: RepoP@ssword4Docker
+
+# ansible_architecture: all, x86_64, aarch64
+target_ansible_architecture: x86_64
 
 image_files_target: "ansible-docker/roles/import/files"
 image_files:
-  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/system",tag: "1.0.0-snapshot" }
-  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/infra",tag: "1.0.0-snapshot" }
-  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/bpm",tag: "1.0.0-snapshot" }
-  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/report",tag: "1.0.0-snapshot" }
-  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/gateway",tag: "1.0.0-snapshot" }
-  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/monitor",tag: "1.0.0-snapshot" }
-  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/iot",tag: "1.0.0-snapshot" }
-  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/openresty",tag: "1.0.0-snapshot" }
-  - { type: "basic",repository: "redis",tag: "6.2.0" }
-  - { type: "basic",repository: "apache/rocketmq",tag: "4.9.4" }
-  - { type: "basic",repository: "apacherocketmq/rocketmq-dashboard",tag: "1.0.0" }
-  - { type: "basic",repository: "nacos/nacos-server",tag: "v2.2.1-slim" }
-  - { type: "basic",repository: "xuxueli/xxl-job-admin",tag: "2.2.0" }
-  - { type: "basic",repository: "prom/prometheus",tag: "v2.37.3" }
-  - { type: "basic",repository: "prom/alertmanager",tag: "v0.24.0" }
-  - { type: "basic",repository: "timonwong/prometheus-webhook-dingtalk",tag: "v2.1.0" }
-  - { type: "basic",repository: "grafana/grafana",tag: "8.5.24" }
-  - { type: "basic",repository: "grafana/loki",tag: "2.7.5" }
-  - { type: "basic",repository: "grafana/promtail",tag: "2.7.5" }
-  - { type: "basic",repository: "prom/mysqld-exporter",tag: "v0.14.0" }
-  - { type: "basic",repository: "oliver006/redis_exporter",tag: "v1.45.0" }
-  - { type: "basic",repository: "apache/skywalking-oap-server",tag: "8.9.0" }
-  - { type: "basic",repository: "apache/skywalking-ui",tag: "8.9.0" }
-  - { type: "basic",repository: "prom/mysqld-exporter",tag: "v0.14.0" }
-
+  - { type: "basic",repository: "mysql",tag: "{{mysql_version}}" }
+  - { type: "basic",repository: "redis",tag: "{{redis_version}}",arm64_repository: "Dockerfile" }
+  - { type: "basic",repository: "dyrnq/rocketmq",tag: "{{rocketmq_version}}" }
+  - { type: "basic",repository: "mozhou001/rocketmq-dashboard",tag: "{{rocketmq_dashboard_version}}" }
+  - { type: "basic",repository: "nacos/nacos-server",tag: "{{nacos_server_version}}" }
+  - { type: "basic",repository: "xuxueli/xxl-job-admin",tag: "{{xxl_job_admin_version}}",arm64_repository: "Dockerfile" }
+  - { type: "basic",repository: "prom/prometheus",tag: "{{prometheus_version}}" }
+  - { type: "basic",repository: "prom/alertmanager",tag: "{{alertmanager_version}}" }
+  - { type: "basic",repository: "timonwong/prometheus-webhook-dingtalk",tag: "{{webhook_dingtalk_version}}" }
+  - { type: "basic",repository: "grafana/grafana",tag: "{{grafana_version}}" }
+  - { type: "basic",repository: "grafana/loki",tag: "{{loki_version}}" }
+  - { type: "basic",repository: "grafana/promtail",tag: "{{promtail_version}}" }
+  - { type: "basic",repository: "prom/mysqld-exporter",tag: "{{mysqld_exporter_version}}" }
+  - { type: "basic",repository: "oliver006/redis_exporter",tag: "{{redis_exporter_version}}" }
+  - { type: "basic",repository: "apache/skywalking-oap-server",tag: "{{skywalking_version}}" }
+  - { type: "basic",repository: "apache/skywalking-ui",tag: "{{skywalking_version}}" }
+  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/system-server",tag: "{{system_server_version}}" }
+  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/infra-server",tag: "{{infra_server_version}}" }
+  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/bpm-server",tag: "{{bpm_server_version}}" }
+  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/report-server",tag: "{{report_server_version}}" }
+  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/gateway-server",tag: "{{gateway_server_version}}" }
+  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/monitor-server",tag: "{{monitor_server_version}}" }
+  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/iot-server",tag: "{{iot_server_version}}" }
+  - { type: "apps",registry: "{{docker_pull_repo}}/",repository: "somersault-cloud/openresty",tag: "{{web_server_version}}" }
 
 package_files:
-  - { source: "mysql/mysql-8.0.17.tar.gz",
+  - { source: "mysql/mysql-8.0.34-linux-glibc2.17-x86_64.tar.gz",
       targets: [
-          "ansible-mysql/roles/mysql/files"
+          "ansible-mysql/roles/mysql_bin/files"
+      ]
+  }
+  - { source: "mysql/mysql-8.0.34-linux-glibc2.17-aarch64.tar.gz",
+      targets: [
+          "ansible-mysql/roles/mysql_bin/files",
+           "ansible-mysql/roles/mysql_docker/files"
       ]
   }
   - { source: "mysql/libaio-0.3.109-13.el7.x86_64.rpm",
       targets: [
-          "ansible-mysql/roles/mysql/files"
+          "ansible-mysql/roles/mysql_bin/files"
       ]
   }
   - { source: "mysql/mysql-community-libs-compat-5.7.42-1.el7.x86_64.rpm",
       targets: [
-          "ansible-mysql/roles/mysql/files"
-      ]
-  }
-  - { source: "mysql/MySQL-python-1.2.5-1.el7.x86_64.rpm",
-      targets: [
-          "ansible-mysql/roles/mysql/files"
+          "ansible-mysql/roles/mysql_bin/files"
       ]
   }
   - { source: "keepalived/keepalived-2.2.7.tar.gz",
@@ -61,23 +66,44 @@ package_files:
           "ansible-apps/roles/keepalived/files"
       ]
   }
-  - { source: "devel/devel-rpm-packages.tar",
+  - { source: "devel/devel-rpm-packages-x86_64.tar",
       targets: [
           "ansible-mysql/roles/keepalived/files",
           "ansible-apps/roles/keepalived/files"
       ]
   }
-  - { source: "tool/tool-rpm-packages.tar",
+  - { source: "devel/devel-rpm-packages-aarch64.tar",
+      targets: [
+          "ansible-mysql/roles/keepalived/files",
+          "ansible-apps/roles/keepalived/files"
+      ]
+  }
+  - { source: "tool/tool-rpm-packages-x86_64.tar",
       targets: [
           "ansible-basic/roles/system/files"
       ]
   }
-  - { source: "docker-ce/docker-ce-24.0.2-rpm-packages.tar",
+  - { source: "tool/tool-rpm-packages-aarch64.tar",
+      targets: [
+          "ansible-basic/roles/system/files"
+      ]
+  }
+  - { source: "docker-ce/docker-ce-24.0.2-rpm-packages-x86_64.tar",
+      targets: [
+          "ansible-docker/roles/docker/files"
+      ]
+  }
+  - { source: "docker-ce/docker-ce-24.0.2-rpm-packages-aarch64.tar",
       targets: [
           "ansible-docker/roles/docker/files"
       ]
   }
   - { source: "node_exporter/node_exporter-1.4.1.linux-amd64.tar.gz",
+      targets: [
+          "ansible-ops/roles/node_exporter/files"
+      ]
+  }
+  - { source: "node_exporter/node_exporter-1.4.1.linux-arm64.tar.gz",
       targets: [
           "ansible-ops/roles/node_exporter/files"
       ]

@@ -1,0 +1,34 @@
+---
+- name: set_fact
+  set_fact:
+    package_file_dir: "{{role_path}}/../../files/packages"
+
+- name: "create dir"
+  file:
+    path: "{{package_file_dir}}/{{package_file.source | dirname}}"
+    mode: "0755"
+    state: directory
+
+- name: Check package_file exists
+  stat:
+    path: "{{package_file_dir}}/{{package_file.source}}"
+  register: package_file_result
+
+- name: "rm -f {{package_file.source}}.downloading"
+  shell:
+    cmd: "rm -f {{package_file.source}}.downloading"
+    chdir: "{{package_file_dir}}"
+  when: package_file_result.stat.exists == False
+
+- name: "download file {{package_file.source}}"
+  get_url:
+    url: "{{files_get_url_prefix}}/packages/{{package_file.source}}"
+    dest: "{{package_file_dir}}/{{package_file.source}}.downloading"
+    mode: "0755"
+  when: package_file_result.stat.exists == False
+
+- name: "mv {{package_file.source}}.downloading {{package_file.source}}"
+  shell:
+    cmd: "mv {{package_file.source}}.downloading {{package_file.source}}"
+    chdir: "{{package_file_dir}}"
+  when: package_file_result.stat.exists == False
