@@ -49,7 +49,7 @@ Change these options if you need to adjust how the configs are download to your 
 | Variable                            | Type    | Choices     | Default      | Comment                                                                                                                                   |
 |-------------------------------------|---------|-------------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | openvpn_fetch_client_configs        | boolean | true, false | true         | Download generated client configurations to the local system                                                                              |
-| openvpn_fetch_client_configs_dir    | string  |             | /tmp/ansible | If openvpn_fetch_client_configs is true, the local directory to download the client config files into                                     |
+| openvpn_fetch_client_configs_dir    | string  |             | /data/tmp | If openvpn_fetch_client_configs is true, the local directory to download the client config files into                                     |
 | openvpn_fetch_client_configs_suffix | string  |             | ""           | If openvpn_fetch_client_configs is true, the suffix to append to the downloaded client config files before the trailing `.ovpn` extension |
 
 ### Firewall

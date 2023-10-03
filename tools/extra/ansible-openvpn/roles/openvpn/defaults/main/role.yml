@@ -9,7 +9,7 @@ openvpn_ovpn_dir: "{{ openvpn_base_dir }}"
 
 # Config fetch settings
 openvpn_fetch_client_configs: true
-openvpn_fetch_client_configs_dir: /tmp/ansible
+openvpn_fetch_client_configs_dir: /data/tmp
 openvpn_fetch_client_configs_suffix: ""
 
 # Firewall
