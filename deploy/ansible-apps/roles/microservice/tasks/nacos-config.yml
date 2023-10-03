@@ -27,9 +27,9 @@
     return_content: yes
   register: nacos_login_result
 
-#- name: response of /nacos/v1/auth/login
-#  debug:
-#    msg: "{{nacos_login_result.json}}"
+- name: response of /nacos/v1/auth/login
+  debug:
+    msg: "{{nacos_login_result.json}}"
 
 - name: set nacos_api_access_token
   set_fact:

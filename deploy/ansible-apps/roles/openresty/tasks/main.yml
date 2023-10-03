@@ -63,7 +63,7 @@
     chdir: "{{apps_openresty_dir}}"
   failed_when: false
 
-- name: docker compose up -d --pull always
+- name: docker compose up -d
   shell:
-    cmd: "docker compose up -d --pull always"
+    cmd: "docker compose up -d"
     chdir: "{{apps_openresty_dir}}"

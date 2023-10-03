@@ -1,47 +1,62 @@
 ---
-
-gateway_port: 48080
-
-system_server: {
-  ignored: false,
-  replicas: 1,
-  java_opts: "-Xms128m -Xmx256m",
-  image_version: "1.0.0-snapshot"
-}
-
-infra_server: {
-  ignored: false,
-  replicas: 1,
-  java_opts: "-Xms128m -Xmx256m",
-  image_version: "1.0.0-snapshot"
-}
-
-bpm_server: {
-  ignored: false,
-  disabled: false,
-  replicas: 1,
-  java_opts: "-Xms128m -Xmx256m",
-  image_version: "1.0.0-snapshot"
-}
-
-report_server: {
-  ignored: false,
-  disabled: false,
-  replicas: 1,
-  java_opts: "-Xms128m -Xmx256m",
-  image_version: "1.0.0-snapshot"
-}
-
-iot_server: {
-  ignored: false,
-  disabled: false,
-  replicas: 1,
-  java_opts: "-Xms128m -Xmx256m",
-  image_version: "1.0.0-snapshot"
-}
-
-gateway_server: {
-  ignored: false,
-  java_opts: "-Xms128m -Xmx256m",
-  image_version: "1.0.0-snapshot"
-}
+microservices:
+  - { name: "somersault-cloud-system",
+      service_id: "system-server",
+      ignored: false,
+      disabled: false,
+      port: 49000,
+      replicas: 1,
+      docker_image_name: "somersault-cloud/system-server",
+      docker_image_version: "{{system_server_version}}",
+      java_opts: "-Xms128m -Xmx256m"
+  }
+  - { name: "somersault-cloud-infra",
+      service_id: "infra-server",
+      ignored: false,
+      disabled: false,
+      port: 49100,
+      replicas: 1,
+      docker_image_name: "somersault-cloud/infra-server",
+      docker_image_version: "{{infra_server_version}}",
+      java_opts: "-Xms128m -Xmx256m"
+  }
+  - { name: "somersault-cloud-bpm",
+      service_id: "bpm-server",
+      ignored: false,
+      disabled: false,
+      port: 49200,
+      replicas: 1,
+      docker_image_name: "somersault-cloud/bpm-server",
+      docker_image_version: "{{bpm_server_version}}",
+      java_opts: "-Xms128m -Xmx256m"
+  }
+  - { name: "somersault-cloud-report",
+      service_id: "report-server",
+      ignored: false,
+      disabled: false,
+      port: 49300,
+      replicas: 1,
+      docker_image_name: "somersault-cloud/report-server",
+      docker_image_version: "{{report_server_version}}",
+      java_opts: "-Xms128m -Xmx256m"
+  }
+  - { name: "somersault-cloud-iot",
+      service_id: "iot-server",
+      ignored: false,
+      disabled: false,
+      port: 49500,
+      replicas: 1,
+      docker_image_name: "somersault-cloud/iot-server",
+      docker_image_version: "{{iot_server_version}}",
+      java_opts: "-Xms128m -Xmx256m"
+  }
+  - { name: "somersault-cloud-gateway",
+      service_id: "gateway-server",
+      ignored: false,
+      disabled: false,
+      port: "{{gateway_port | int}}",
+      replicas: 1,
+      docker_image_name: "somersault-cloud/gateway-server",
+      docker_image_version: "{{gateway_server_version}}",
+      java_opts: "-Xms128m -Xmx256m"
+  }

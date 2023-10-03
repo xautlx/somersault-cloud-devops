@@ -8,7 +8,7 @@ version: "3"
 services:
   openresty:
     container_name: openresty
-    image: "{{docker_image_repo | default('')}}somersault-cloud/openresty:1.0.0-snapshot"
+    image: "{{docker_image_repo | default('')}}somersault-cloud/openresty:{{web_server_version}}"
     restart: always
     ports:
       - "{{http_port}}:{{http_port}}"
