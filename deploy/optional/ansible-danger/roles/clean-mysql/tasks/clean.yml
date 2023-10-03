@@ -7,18 +7,6 @@
   shell: "systemctl kill mysqld"
   failed_when: false
 
-#- name: yum-complete-transaction --cleanup-only
-#  shell: "yum-complete-transaction --cleanup-only"
-#  failed_when: false
-#
-#- name: remove mysql package
-#  shell: "timeout 10 yum -y remove $(rpm -qa | grep -i -e mysql-community -e mysql80-community)"
-#  failed_when: false
-#
-#- name: yum-complete-transaction --cleanup-only
-#  shell: "yum-complete-transaction --cleanup-only"
-#  failed_when: false
-
 # yum list installed|grep mysql OR rpm -qa|grep mysql
 - name: remove mysql package
   shell: "yum -y remove {{item}}"

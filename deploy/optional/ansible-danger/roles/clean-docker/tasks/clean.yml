@@ -19,13 +19,8 @@
   retries: 3
   failed_when: false
 
-- name: reboot host for docker system resource release
-  reboot:
-
-#- name: systemctl stop docker
-#  shell: "systemctl stop docker"
-#  retries: 3
-#  failed_when: false
+#- name: reboot host for docker system resource release
+#  reboot:
 
 - name: remove all docker dir
   file:
@@ -37,21 +32,18 @@
     - "/var/run/docker"
     - "/var/lib/docker"
 #    - "/var/lib/dockershim"
-  retries: 3
   ignore_errors: true
 
 # yum list installed|grep docker OR rpm -qa|grep docker
 - name: remove docker package
   shell: "yum -y remove {{item}}"
   loop:
-    - "containerd.io.x86_64"
-    - "docker-buildx-plugin.x86_64 "
-    - "docker-ce.x86_64"
-    - "docker-ce-cli.x86_64"
-    - "docker-ce-rootless-extras.x86_64"
-    - "docker-compose-plugin.x86_64"
-#    - "docker-scan-plugin.x86_64"
-  retries: 3
+    - "containerd.io.{{ansible_architecture}}"
+    - "docker-buildx-plugin.{{ansible_architecture}} "
+    - "docker-ce.{{ansible_architecture}}"
+    - "docker-ce-cli.{{ansible_architecture}}"
+    - "docker-ce-rootless-extras.{{ansible_architecture}}"
+    - "docker-compose-plugin.{{ansible_architecture}}"
   ignore_errors: true
 
 

@@ -1,16 +1,18 @@
 ---
 - import_playbook: ansible-basic/startup.yml
-- import_playbook: ansible-files/files-download.yml
-- import_playbook: ansible-files/files-link.yml
+- import_playbook: ansible-files/files-download-package.yml
+- import_playbook: ansible-files/files-link-package.yml
 - import_playbook: ansible-basic/system.yml
 - import_playbook: ansible-ops/iptables.yml
+- import_playbook: ansible-docker/docker.yml
+- import_playbook: ansible-files/files-download-image.yml
+- import_playbook: ansible-files/files-link-image.yml
+- import_playbook: ansible-docker/import.yml
 - import_playbook: ansible-mysql/mysql.yml
 - import_playbook: ansible-mysql/keepalived.yml
 - import_playbook: ansible-mysql/replication.yml
 - import_playbook: ansible-mysql/initdb.yml
 - import_playbook: ansible-mysql/initdata.yml
-- import_playbook: ansible-docker/docker.yml
-- import_playbook: ansible-docker/import.yml
 - import_playbook: ansible-midware/nacos.yml
 - import_playbook: ansible-midware/redis.yml
 - import_playbook: ansible-midware/rocketmq.yml
@@ -25,5 +27,6 @@
 - import_playbook: ansible-ops/skywalking.yml
 - import_playbook: ansible-ops/monitor.yml
 - import_playbook: ansible-apps/microservice.yml
+- import_playbook: ansible-ops/prometheus.yml
 - import_playbook: ansible-apps/openresty.yml
 - import_playbook: ansible-apps/keepalived.yml

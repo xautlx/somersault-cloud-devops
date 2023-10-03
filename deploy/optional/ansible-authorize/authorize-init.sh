@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s expand_aliases
+source /etc/profile.d/ansbile-alias.sh
 CUR_DIR="$(pwd)"
 SHELL_DIR="$(cd "$(dirname "$0")" && pwd)"
 #echo "CD to ${SHELL_DIR} dir to execute scripts"
@@ -25,6 +27,8 @@ if [ ! -f ~/.ssh/id_rsa ]; then
   echo '免密初始化设置，输入信息生成秘钥: '
   ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa
 fi
+
+yum install -y sshpass
 
 echo "========================================="
 echo "请输入root密码执行主机初始化配置："
