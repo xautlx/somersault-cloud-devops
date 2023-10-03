@@ -1,0 +1,44 @@
+---
+- name: set_fact
+  set_fact:
+    install_cache_dir: /data/cache/docker_install
+    install_tmp_dir: /data/tmp/docker_install
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{install_tmp_dir}}"
+    - "{{install_cache_dir}}"
+    - "/etc/docker"
+
+- name: copy cache docker packages
+  copy:
+    src: 'files/docker-ce-{{docker_version}}-rpm-packages-{{ansible_architecture}}.tar'
+    dest: '{{install_cache_dir}}'
+    
+- name: unarchive docker-ce-rpm-packages
+  unarchive:
+    remote_src: true
+    src: '{{install_cache_dir}}/docker-ce-{{docker_version}}-rpm-packages-{{ansible_architecture}}.tar'
+    dest: '{{install_tmp_dir}}'
+
+- name: list rpm files
+  find:
+    paths: "{{ install_tmp_dir }}"
+    patterns: "*.rpm"
+  register: rpm_file_result
+  changed_when: False
+
+- name: rpm install docker-ce rpm-packages
+  shell:
+    cmd: "rpm -Uvh {{item.path}} --nodeps"
+  ignore_errors: true
+  with_items: "{{rpm_file_result.files}}"
+
+- name: rm {{install_tmp_dir}}
+  shell:
+    cmd: "rm -fr {{install_tmp_dir}}"
+  when: "'/data/tmp/' in install_tmp_dir"

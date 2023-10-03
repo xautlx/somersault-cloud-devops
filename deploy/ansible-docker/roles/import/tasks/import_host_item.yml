@@ -1,20 +1,20 @@
 ---
-- name: upload basic docker image tar files
+- name: set image_file_name
+  set_fact:
+    image_file_name: '{{image_file.repository|basename}}-{{image_file.tag}}-{{ansible_architecture}}.tar'
+
+- name: Check image_file exists
+  stat:
+    path: "{{install_cache_dir}}/{{image_file.type}}/{{image_file_name}}"
+  register: upload_file_result
+
+- name: upload docker image {{image_file_name}}
   copy:
-    src: '{{image_file.repository|basename}}@{{image_file.tag}}.tar'
-    dest: '{{install_tmp_dir}}'
+    src: '{{image_file_name}}'
+    dest: '{{install_cache_dir}}/{{image_file.type}}'
+  when: upload_file_result.stat.exists == False
 
-- name: docker load from basic image tar files
+- name: docker load {{image_file_name}}
   shell:
-    cmd: "docker load -i {{image_file.repository|basename}}@{{image_file.tag}}.tar"
-    chdir: "{{install_tmp_dir}}"
-
-- name: upload apps docker image tar files
-  copy:
-    src: '{{image_file.repository|basename}}@{{image_file.tag}}.tar'
-    dest: '{{install_tmp_dir}}'
-
-- name: docker load from apps image tar files
-  shell:
-    cmd: "docker load -i {{image_file.repository|basename}}@{{image_file.tag}}.tar"
-    chdir: "{{install_tmp_dir}}"
+    cmd: "docker load -i {{image_file_name}}"
+    chdir: "{{install_cache_dir}}/{{image_file.type}}"

@@ -1,8 +1,10 @@
 {
   "ipv6": false,
+{% if docker_repo_insecure is defined and docker_repo_insecure | bool == True  %}
   "insecure-registries": [
     "{{docker_repo_addr}}"
   ],
+{% endif %}
   "registry-mirrors": [
     "https://hmodyls1.mirror.aliyuncs.com",
     "https://docker.mirrors.ustc.edu.cn/",

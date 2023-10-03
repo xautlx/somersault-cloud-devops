@@ -1,7 +1,7 @@
 ---
 - name: set_fact
   set_fact:
-    install_tmp_dir: /tmp/ansible/docker_images
+    install_cache_dir: /data/cache/docker_images
 
 - name: create data dir
   file:
@@ -9,14 +9,33 @@
     mode: "0755"
     state: directory
   loop:
-    - "{{install_tmp_dir}}"
+    - "{{install_cache_dir}}/basic"
+    - "{{install_cache_dir}}/apps"
+
+- name: list exist images
+  shell:
+    cmd: "docker images | grep -v REPOSITORY"
+  register: exist_image_list
+  ignore_errors: true
+
+- name: print exist_image_list
+  debug:
+    msg: "{{ exist_image_list}}"
+
+- name: set_fact exist_images
+  set_fact:
+    exist_images: "{{(exist_image_list.stdout_lines | join(',')).split() | join('-')}}"
+
+- name: print exist_images
+  debug:
+    msg: "{{ exist_images}}"
 
 - include_tasks: import_host.yml
   vars:
     image_file: "{{item}}"
   loop: "{{image_files}}"
   when:
-    - docker_repo_addr | default('') == ''
+    - "'{{item.repository}}-{{item.tag}}' not in exist_images"
 
 - name: "docker login {{docker_repo_addr}}"
   delegate_to: localhost
@@ -37,4 +56,6 @@
   loop: "{{image_files}}"
   when:
     - docker_repo_addr | default('') != ''
+    - item.type == 'apps'
     - inventory_hostname == groups['docker'][0]
+    - "'{{item.repository}}-{{item.tag}}' not in exist_images"

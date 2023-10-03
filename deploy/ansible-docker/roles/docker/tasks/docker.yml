@@ -4,38 +4,8 @@
     path: /etc/docker/daemon.json
   register: docker_result
 
-- name: set_fact
-  set_fact:
-    install_tmp_dir: /tmp/ansible/docker_install
-
-- name: create data dir
-  file:
-    path: "{{item}}"
-    mode: "0755"
-    state: directory
-  loop:
-    - "{{install_tmp_dir}}"
-    - "/etc/docker"
-
-- name: unarchive docker-ce-rpm-packages
-  unarchive:
-    src: 'files/docker-ce-{{docker_version}}-rpm-packages.tar'
-    dest: '{{install_tmp_dir}}'
-  when:
-    - docker_result.stat.exists == False
-
-- name: rpm install docker-ce rpm-packages
-  shell:
-    cmd: "rpm -Uvh *.rpm --nodeps --force"
-    chdir: "{{install_tmp_dir}}"
-  failed_when: false
-  when:
-    - docker_result.stat.exists == False
-
-#- name: clear devel-rpm-packages
-#  shell:
-#    cmd: "rm -f *.rpm"
-#    chdir: "{{install_tmp_dir}}"
+- include_tasks: docker_install.yml
+  when: docker_result.stat.exists == False
 
 - name: setup docker daemon.json
   template:
