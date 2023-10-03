@@ -75,11 +75,8 @@ if [ ! -f /opt/ansible/bin/ansible ]; then
   echo ' - ansible install sshpass rpm...'
   find  rpm/sshpass/*.rpm  -exec rpm -Uvh --nodeps {} \;
 
-  tar -xzf ansible-2.15.4.tar.gz
-  mv ansible-2.15.4 /opt/ansible
-  mkdir /opt/ansible/packages
-  # /usr/local/python/bin/pip3 download -d packages -r requirements.txt  -i https://pypi.tuna.tsinghua.edu.cn/simple
-  tar -xzf python3_packages.tar.gz -C /opt/ansible/packages/.
+  tar -xzf ansible-${ansible_ver}.tar.gz
+  mv ansible-${ansible_ver} /opt/ansible
   mkdir /etc/ansible
   cp ansible.cfg /etc/ansible/ansible.cfg
   cp ansbile-source.sh /etc/profile.d/.
@@ -89,6 +86,7 @@ if [ ! -f /opt/ansible/bin/ansible ]; then
 
   cd /opt/ansible
   echo ' - ansible install python3 packages...'
+  # /usr/local/python/bin/pip3 download -d packages -r requirements.txt  -i https://pypi.tuna.tsinghua.edu.cn/simple
   /usr/local/python/bin/pip3 install --no-index --find-links=${SHELL_DIR}/files/packages -r requirements.txt
 
   cd ${SHELL_DIR}/files/collections
