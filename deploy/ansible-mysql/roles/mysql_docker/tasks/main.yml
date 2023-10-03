@@ -1,0 +1,52 @@
+---
+- name: Create mysql required Directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ mysql_install_user }}"
+    group: "{{ mysql_install_group }}"
+    mode: 0755
+  with_items:
+    - "{{ mysql_data_path }}"
+    - "{{ mysql_store_path }}"
+
+- name: copy my.cnf.j2
+  template:
+    src: "my.cnf.j2"
+    dest: "{{ mysql_data_path }}/my.cnf"
+    owner: "{{ mysql_install_user }}"
+    group: "{{ mysql_install_group }}"
+    mode: 0644
+
+- name: copy scripts file into initdb datadir
+  template:
+    src: "init-user.sql"
+    dest: "{{mysql_data_path}}/init-user.sql"
+    owner: "{{ mysql_install_user }}"
+    group: "{{ mysql_install_group }}"
+
+- name: copy docker files
+  template:
+    src: "{{item}}"
+    dest: "{{mysql_data_path}}/{{item}}"
+  loop:
+    - "docker-compose.yml"
+
+- name: docker compose down
+  shell:
+    cmd: "docker compose down"
+    chdir: "{{mysql_data_path}}"
+  failed_when: false
+
+- name: docker compose up -d
+  shell:
+    cmd: "docker compose up -d"
+    chdir: "{{mysql_data_path}}"
+
+- name: Check if mysql file exists
+  stat:
+    path: "{{software_install_path}}/mysql"
+  register: mysql_file_check
+
+- include_tasks: mysql_client.yml
+  when: not mysql_file_check.stat.exists

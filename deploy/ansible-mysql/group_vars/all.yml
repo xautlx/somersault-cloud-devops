@@ -5,6 +5,12 @@ mysql_replication_passwd: MySQLP@ssword4repl
 mysql_prom_exporter_name: prom_exporter
 mysql_prom_exporter_passwd: MySQLP@ssword4exporter
 
+mysql_install_user: "app"
+mysql_install_group: "app"
+
+mysql_data_path: "/data/mysql"
+initdb_datadir: "{{mysql_data_path}}/initdb"
+
 db_names:
   - "somersault_cloud_nacos"
   - "somersault_cloud_job"

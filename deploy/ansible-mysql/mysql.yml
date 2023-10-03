@@ -5,5 +5,11 @@
   hosts: mysql
   become: yes
   roles:
-    - role: mysql
-      when: mysql_install | bool == True
+    - role: mysql_bin
+      when:
+        - mysql_install | default("") | bool == True
+        - ansible_architecture != 'aarch64'
+    - role: mysql_docker
+      when:
+        - mysql_install | default("") | bool == True
+        - ansible_architecture == 'aarch64'

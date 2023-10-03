@@ -1,0 +1,13 @@
+mysql_root_host: "localhost"
+# 版本
+mysql_version: "8.0.34"
+mysql_file_name: "mysql-{{mysql_version}}-linux-glibc2.17-{{ansible_architecture}}"
+mysql_file: "{{mysql_file_name}}.tar.gz"
+software_install_path: "/usr/local"
+
+mysql_dbfile_path: "{{mysql_data_path}}/dbfile"
+mysql_run_path: "{{mysql_data_path}}/run"
+mysql_log_path: "{{mysql_data_path}}/log"
+mysql_binlog_path: "{{mysql_data_path}}/binlog"
+mysql_relaylog_path: "{{mysql_data_path}}/relaylog"
+mysql_tmpfile_path: "{{mysql_data_path}}/tmpfile"

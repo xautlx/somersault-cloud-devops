@@ -1,0 +1,57 @@
+---
+- name: set_fact
+  set_fact:
+    install_cache_dir: /data/cache/mysql_install
+
+- name: create data dir
+  file:
+    path: "{{item}}"
+    mode: "0755"
+    state: directory
+  loop:
+    - "{{install_cache_dir}}"
+
+- name: copy cache mysql packages
+  copy:
+    src: '{{item}}'
+    dest: '{{install_cache_dir}}'
+  with_fileglob:
+    - "{{role_path}}/files/*{{ansible_architecture}}.rpm"
+    - "{{role_path}}/files/*{{ansible_architecture}}.tar.gz"
+
+- name: "unarchive mysql file to {{ software_install_path }}"
+  unarchive:
+    src: "{{install_cache_dir}}/{{ mysql_file }}"
+    dest: "{{ software_install_path }}"
+    owner: "{{ mysql_install_user }}"
+    group: "{{ mysql_install_group }}"
+    remote_src: true
+
+- name: rename dir name
+  shell:
+    cmd: "mv {{mysql_file_name}} mysql"
+    chdir: "{{ software_install_path }}"
+
+- name: install mysql rpm packages
+  shell:
+    cmd: "rpm -Uvh *.rpm --nodeps"
+    chdir: "{{ install_cache_dir }}"
+  ignore_errors: true
+
+- name: link mysql to bin path
+  shell:
+    cmd: "ln -s /usr/local/mysql/bin/mysql /usr/bin/mysql | cat"
+
+- name: copy mysql.server to /etc/init.d
+  copy:
+    src: /usr/local/mysql/support-files/mysql.server
+    dest: /etc/init.d/mysqld
+    remote_src: yes
+
+- name: append mysqld to auto startup
+  shell:
+    cmd: "{{item}}"
+  loop:
+    - "chmod a+wrx /etc/init.d/mysqld"
+    - "chkconfig --level 345 mysqld on"
+    - "chkconfig --list"

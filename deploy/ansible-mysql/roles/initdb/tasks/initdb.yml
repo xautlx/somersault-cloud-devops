@@ -1,5 +1,5 @@
 ---
-- name: create data dir
+- name: create initdb dir
   file:
     path: "{{initdb_datadir}}"
     state: directory
@@ -10,8 +10,7 @@
     dest: "{{initdb_datadir}}/init-db.sql"
 
 - name: source scripts file in initdb datadir
-  shell: mysql -uroot -p'{{ mysql_root_password }}' -NBe "source {{initdb_datadir}}/init-db.sql;"
-  failed_when: false
+  shell: mysql -uroot -p'{{ mysql_root_password }}' -h{{mysql_master_vip}} -NBe "source {{initdb_datadir}}/init-db.sql;"
 
 # 出于安全考虑按文件删除，而不是直接目录变量删除
 # 如果脚本名称变更了，请手工清除服务器上遗留脚本文件

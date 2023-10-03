@@ -1,0 +1,2 @@
+---
+mysql_store_path: "{{mysql_data_path}}/store"

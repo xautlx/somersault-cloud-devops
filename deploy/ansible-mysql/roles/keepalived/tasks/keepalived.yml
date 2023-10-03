@@ -1,7 +1,7 @@
 ---
 - name: set_fact
   set_fact:
-    install_tmp_dir: /tmp/ansible/keepalived_install
+    install_tmp_dir: /data/tmp/keepalived_install
 
 - name: create data dir
   file:
@@ -14,19 +14,14 @@
 
 - name: unarchive devel-rpm-packages
   unarchive:
-    src: 'files/devel-rpm-packages.tar'
+    src: 'files/devel-rpm-packages-{{ansible_architecture}}.tar'
     dest: '{{install_tmp_dir}}'
 
 - name: rpm install devel-rpm-packages
   shell:
-    cmd: "rpm -Uvh *.rpm --nodeps --force "
+    cmd: "rpm -Uvh *.rpm --nodeps"
     chdir: "{{install_tmp_dir}}"
   failed_when: false
-
-- name: clear devel-rpm-packages
-  shell:
-    cmd: "rm -f *.rpm"
-    chdir: "{{install_tmp_dir}}"
 
 - name: unarchive keepalived-{{keepalived_version}} source
   unarchive:
@@ -40,11 +35,6 @@
   loop:
     - './configure --prefix=/usr/local/keepalived && make -j 4 && make install'
     - 'ln -sf /usr/local/keepalived/sbin/keepalived /usr/sbin/keepalived'
-
-#- name: clear keepalived-{{keepalived_version}} source
-#  shell:
-#    cmd: "rm -fr keepalived-{{keepalived_version}}"
-#    chdir: "{{install_tmp_dir}}"
 
 - name: copy keepalived to /etc/init.d
   copy:
@@ -66,3 +56,8 @@
     regexp: '^SELINUX='
     line: SELINUX=disabled
   failed_when: false
+
+- name: rm {{install_tmp_dir}}
+  shell:
+    cmd: "rm -fr {{install_tmp_dir}}"
+  when: "'/data/tmp/' in install_tmp_dir"

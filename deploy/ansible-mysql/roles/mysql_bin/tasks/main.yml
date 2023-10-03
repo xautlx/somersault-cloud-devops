@@ -1,7 +1,7 @@
 ---
 - name: Check if mysql file exists
   stat:
-    path: "/usr/bin/mysql"
+    path: "{{software_install_path}}/mysql"
   register: mysql_file_check
 
 - include_tasks: mysql_install.yml

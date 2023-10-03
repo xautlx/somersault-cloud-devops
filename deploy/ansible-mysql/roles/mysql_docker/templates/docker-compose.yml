@@ -1,0 +1,19 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+  mysql:
+    image: mysql:{{mysql_version}}
+    container_name: mysql
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./store:/var/lib/mysql
+      - ./my.cnf:/etc/my.cnf
+      - ./init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
+    network_mode: host
+    environment:
+      SET_CONTAINER_TIMEZONE: true
+      CONTAINER_TIMEZONE: Asia/Shanghai
+      TZ: "Asia/Shanghai"
+      MYSQL_ROOT_PASSWORD: "{{mysql_root_password}}"

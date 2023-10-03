@@ -1,0 +1,69 @@
+---
+
+- name: Create mysql required Directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ mysql_install_user }}"
+    group: "{{ mysql_install_group }}"
+    mode: 0755
+  with_items:
+    - "{{ mysql_data_path }}"
+    - "{{ mysql_run_path }}"
+    - "{{ mysql_log_path }}"
+    - "{{ mysql_binlog_path }}"
+    - "{{ mysql_relaylog_path }}"
+    - "{{ mysql_tmpfile_path }}"
+
+- name: copy my.cnf.j2
+  template:
+    src: "my.cnf.j2"
+    dest: /etc/my.cnf
+    owner: "{{ mysql_install_user }}"
+    group: "{{ mysql_install_group }}"
+    mode: 0644
+
+- name: mysql initialize
+  shell:
+    cmd: "/usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --basedir=/usr/local/mysql/ --datadir={{mysql_dbfile_path}} --log-bin={{mysql_binlog_path}}/mysql-bin --user={{mysql_install_user}} --initialize | cat"
+
+- name: pkill mysqld after initialize
+  shell:
+    cmd: "pkill mysqld"
+  failed_when: false
+
+- name: Ensure mysqld is started and enabled on boot.
+  service:
+    name: "mysqld"
+    state: restarted
+    enabled: "true"
+
+- name: get default root password
+  shell:
+    cmd: cat /data/mysql/log/mysqld-error.log  | grep "temporary password is generated" | cut -d " " -f 13
+  register: default_root_passwd
+
+- name: show default root password
+  debug:
+    msg: '{{default_root_passwd}}'
+
+- name: root_password reset
+  shell:
+    cmd: mysql -uroot -p"{{default_root_passwd.stdout}}" --connect-expired-password  -e  "alter user 'root'@'localhost' identified with mysql_native_password by '{{ mysql_root_password }}';"
+
+- name: create initdb dir
+  file:
+    path: "{{initdb_datadir}}"
+    state: directory
+
+- name: copy scripts file into initdb datadir
+  template:
+    src: "init-user.sql"
+    dest: "{{initdb_datadir}}/init-user.sql"
+    owner: "{{ mysql_install_user }}"
+    group: "{{ mysql_install_group }}"
+
+- name: source scripts file in initdb datadir
+  shell: mysql -uroot -p'{{ mysql_root_password }}' -NBe "source {{initdb_datadir}}/init-user.sql;"
+  failed_when: false
+

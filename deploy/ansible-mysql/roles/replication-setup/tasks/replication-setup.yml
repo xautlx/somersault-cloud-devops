@@ -1,4 +1,3 @@
-### value of mode must be one of: getprimary, getreplica, changeprimary, stopreplica, startreplica, resetprimary, resetreplica, resetreplicaall
 ---
 - name: Get replication master addr from hosts config
   set_fact:
@@ -6,31 +5,47 @@
   when: hostvars[inventory_hostname]['ansible_ssh_host'] != hostvars[item]['ansible_ssh_host']
   with_items: "{{groups['mysql']}}"
 
-- name: "Stop slave."
-  mysql_replication:
-    mode: stopslave
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
-    login_host: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
-    login_unix_socket: "/data/mysql/run/mysql.sock"
+#- name: "Stop slave."
+#  mysql_replication:
+#    mode: stopslave
+#    login_user: root
+#    login_password: "{{ mysql_root_password }}"
+#    login_host: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
+#    login_unix_socket: "/data/mysql/run/mysql.sock"
+#
+#- name: "Configure replication on the slave."
+#  mysql_replication:
+#    mode: changemaster
+#    master_host: "{{ mysql_replication_master }}"
+#    master_user: "{{ mysql_replication_name }}"
+#    master_password: "{{ mysql_replication_passwd }}"
+#    master_auto_position: yes
+#    login_user: root
+#    login_password: "{{ mysql_root_password }}"
+#    login_host: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
+#    login_unix_socket: "/data/mysql/run/mysql.sock"
+#
+## mysql -urepl -pMySQLP@ssword4repl -e "show master status\G;"
+## mysql -urepl -pMySQLP@ssword4repl -e "show slave status\G;"
+#- name: Start replication.
+#  shell: >
+#    mysql -h{{mysql_replication_master}} -uroot -p'{{ mysql_root_password }}' -e "start slave;" && sleep 3
 
-- name: "Configure replication on the slave."
-  mysql_replication:
-    mode: changemaster
-    master_host: "{{ mysql_replication_master }}"
-    master_user: "{{ mysql_replication_name }}"
-    master_password: "{{ mysql_replication_passwd }}"
-    master_auto_position: yes
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
-    login_host: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
-    login_unix_socket: "/data/mysql/run/mysql.sock"
+- name: create initdb dir
+  file:
+    path: "{{initdb_datadir}}"
+    state: directory
 
-# mysql -urepl -pMySQLP@ssword4repl -e "show master status\G;"
-# mysql -urepl -pMySQLP@ssword4repl -e "show slave status\G;"
-- name: Start replication.
-  shell: >
-    mysql -h{{mysql_replication_master}} -uroot -p'{{ mysql_root_password }}' -e "start slave;" && sleep 3
+- name: copy scripts file into initdb datadir
+  template:
+    src: "init-repl.sql"
+    dest: "{{initdb_datadir}}/init-repl.sql"
+    owner: "{{ mysql_install_user }}"
+    group: "{{ mysql_install_group }}"
+
+- name: source scripts file in initdb datadir
+  shell: mysql -uroot -p'{{ mysql_root_password }}' -NBe "source {{initdb_datadir}}/init-repl.sql;"
+  failed_when: false
 
 - name: Exec 'show slave status' for slave
   shell: >

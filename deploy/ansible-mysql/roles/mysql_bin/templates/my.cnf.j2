@@ -32,7 +32,7 @@ auto_increment_increment={{groups['mysql'] | length}}  #自增主键步长，通
 auto_increment_offset={{mysql_server_id}}  #设置自增主键起始值，第一个主库A为1，第二个主库A为2，以此类推
 
 # basic settings #
-user = {{mysql_user}}
+user = {{mysql_install_user}}
 character_set_server=utf8mb4
 collation-server=utf8mb4_unicode_ci
 symbolic-links=0
@@ -89,8 +89,8 @@ binlog-rows-query-log-events = 1
 log-bin-trust-function-creators = 1
 
 # innodb settings #
-#根据实际物理内存配置，一般为物理内存的60%
-innodb_buffer_pool_size = {{ innodb_buffer_pool_size }}
+# 根据实际物理内存配置，一般为物理内存的60%
+#innodb_buffer_pool_size = 4GB
 
 # 根据您的服务器IOPS能力适当调整
 #机械硬盘按200每颗盘计算

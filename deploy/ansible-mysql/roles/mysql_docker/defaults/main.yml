@@ -1,0 +1,5 @@
+# 版本
+mysql_version: "8.0.17"
+
+mysql_root_host: "localhost"
+software_install_path: "/usr/local"
