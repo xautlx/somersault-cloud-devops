@@ -3,7 +3,7 @@ version: '3'
 services:
 
   mqbroker:
-    image: "{{docker_image_repo | default('')}}apache/rocketmq:{{rocketmq_version}}"
+    image: "dyrnq/rocketmq:{{rocketmq_version}}"
     container_name: "{{rocketmq_mqbroker_dirname}}"
     restart: always
   {% if rocketmq_replication_type == 'master' %}

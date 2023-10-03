@@ -6,7 +6,7 @@
 version: "3.8"
 services:
   nacos: # https://github.com/nacos-group/nacos-docker/blob/master/example/cluster-ip.yaml
-    image: "{{docker_image_repo | default('')}}nacos/nacos-server:{{nacos_version}}"
+    image: "nacos/nacos-server:{{nacos_version}}"
     container_name: nacos
     restart: always
     environment:

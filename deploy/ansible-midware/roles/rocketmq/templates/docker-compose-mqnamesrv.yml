@@ -2,7 +2,7 @@
 version: '3'
 services:
   mqnamesrv:
-    image: "{{docker_image_repo | default('')}}apache/rocketmq:{{rocketmq_version}}"
+    image: "dyrnq/rocketmq:{{rocketmq_version}}"
     container_name: mqnamesrv
     restart: always
     ports:

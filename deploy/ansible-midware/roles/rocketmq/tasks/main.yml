@@ -4,13 +4,13 @@
     docker_image_repo: "{{docker_repo_addr}}/"
   when: docker_repo_addr | default('') != ''
 
-- ansible.builtin.include_tasks: mqnamesrv.yml
+- include_tasks: mqnamesrv.yml
   when: rocketmq_replication_role == 'mqnamesrv'
 
-- ansible.builtin.include_tasks: mqbroker.yml
+- include_tasks: mqbroker.yml
   when: rocketmq_replication_role == 'mqbroker'
 
-- ansible.builtin.include_tasks: mqdashboard.yml
+- include_tasks: mqdashboard.yml
   when:
     - rocketmq_replication_role == 'mqdashboard'
     - hostvars[inventory_hostname]['rocketmq_dashboard_port'] is defined

@@ -1,6 +1,6 @@
 ---
-xxl_job_version: "2.2.0"
+xxl_job_admin_version: "2.2.0"
 xxl_job_dir: "/data/xxl-job"
-
-xxl_job_port: "9090"
+# 默认9090在有些系统systemd服务端口冲突
+xxl_job_port: "9091"
 

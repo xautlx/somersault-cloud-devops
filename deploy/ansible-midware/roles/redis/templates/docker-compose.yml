@@ -3,7 +3,7 @@ services:
   redis:
     container_name: redis
     hostname: redis
-    image: "{{docker_image_repo | default('')}}redis:{{redis_version}}"
+    image: "redis:{{redis_version}}"
     volumes:
       - "./data:/data"
       - "./redis.conf:/etc/redis/redis.conf"
@@ -20,7 +20,7 @@ services:
 
   redis_exporter:
     container_name: redis_exporter
-    image: "{{docker_image_repo | default('')}}oliver006/redis_exporter:v1.45.0"
+    image: "oliver006/redis_exporter:{{redis_exporter_version}}"
     environment:
       TZ: "Asia/Shanghai"
       REDIS_ADDR: "redis://redis:6379"

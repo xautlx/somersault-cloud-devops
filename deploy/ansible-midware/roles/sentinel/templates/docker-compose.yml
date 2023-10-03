@@ -1,7 +1,7 @@
 version: '3'
 services:
   redis-sentinel:
-    image: "{{docker_image_repo | default('')}}redis:{{redis_version}}"
+    image: "redis:{{redis_version}}"
     container_name: redis-sentinel
     restart: always
     ports:

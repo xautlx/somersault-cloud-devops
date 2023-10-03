@@ -32,12 +32,12 @@
     - "logs"
     - "data"
 
-- name: copy docker files
+- name: copy docker-compose-mqbroker.yml
   template:
     src: "docker-compose-mqbroker.yml"
     dest: "{{rocketmq_mqbroker_dir}}/docker-compose.yml"
 
-- name: copy docker files
+- name: copy broker.conf
   template:
     src: "broker.conf"
     dest: "{{rocketmq_mqbroker_dir}}/conf/broker.conf"
