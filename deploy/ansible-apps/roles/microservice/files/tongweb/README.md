@@ -1,1 +1,1 @@
-put license.dat file into this dir
+拿到东方通TongWeb的license.dat放到此文件夹下，部署脚本做分发部署
