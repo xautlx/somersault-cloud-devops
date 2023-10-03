@@ -27,7 +27,7 @@
   set_fact:
     alertmanager_host: "{{hostvars[item]['ansible_ssh_host']}}"
     alertmanager_port: "{{hostvars[item]['alertmanager_port']}}"
-  when: "{{item == groups['alertmanager'][0]}}"
+  when: item == groups['alertmanager'][0]
   with_items: "{{groups['all']}}"
 
 - name: copy docker files
@@ -87,3 +87,8 @@
 - name: reload prometheus conf
   shell:
     cmd: "curl -X POST http://127.0.0.1:{{prometheus_port}}/-/reload"
+
+- name: rm {{prometheus_file_sd_configs_temp}}
+  shell:
+    cmd: "rm -fr {{prometheus_file_sd_configs_temp}}"
+  when: "'/data/tmp/' in prometheus_file_sd_configs_temp"

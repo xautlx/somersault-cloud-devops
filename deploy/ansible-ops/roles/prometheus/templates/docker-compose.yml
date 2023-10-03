@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   prometheus:
-    image: "{{docker_image_repo | default('')}}prom/prometheus:{{prometheus_version}}"
+    image: "prom/prometheus:{{prometheus_version}}"
     container_name: prom_prometheus
     hostname: prometheus
     environment:

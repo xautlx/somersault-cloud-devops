@@ -88,9 +88,11 @@ iptables -A INPUT -p tcp -m tcp -s {{hostvars[groups['docker'][0]]['docker_addre
 # Web服务器HTTP端口访问许可
 iptables -A INPUT -p tcp -m tcp --dport {{hostvars[groups['apps_openresty'][0]]['http_port']}} -j ACCEPT
 
-# 禁用常规的互联网资源访问
-iptables -A OUTPUT -p tcp --dport 443 -j DROP
-iptables -A OUTPUT -p tcp --dport 80 -j DROP
+# 屏蔽内网段以外的80和443端口出站请求从而模拟纯内网环境
+{% if iptables_block_internet | bool == True %}
+#iptables -A OUTPUT -p tcp --dport 443 -j DROP
+#iptables -A OUTPUT -p tcp --dport 80 -j DROP
+{% endif %}
 
 # Allow established connections:
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT

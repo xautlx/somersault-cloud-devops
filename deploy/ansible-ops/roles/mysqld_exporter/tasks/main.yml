@@ -1,4 +1,4 @@
 ---
 
-- ansible.builtin.include_tasks: mysqld_exporter.yml
+- include_tasks: mysqld_exporter.yml
   when: groups['prometheus'] | length > 0

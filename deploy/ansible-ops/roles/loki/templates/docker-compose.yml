@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   loki:
-    image: "{{docker_image_repo | default('')}}grafana/loki:{{loki_version}}"
+    image: "grafana/loki:{{loki_version}}"
     container_name: loki
     restart: always
     ports:

@@ -12,13 +12,12 @@
 
 version: "3"
 services:
-  "somersault-cloud-monitor":
-    image: "{{docker_image_repo | default('')}}somersault-cloud/monitor:{{docker_image_version}}"
-    container_name: "monitor"
+  "monitor-server":
+    image: "{{docker_image_repo | default('')}}somersault-cloud/monitor-server:{{monitor_server_version}}"
+    container_name: "monitor-server"
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: "prod"
-      APP_DEBUG: 'n' # y=启动-Xdebug模式，n=关闭
       ### 基础参数设置 ###
       JAVA_OPTS: "{{java_opts}}"
       CONTAINER_HOST_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
@@ -39,6 +38,5 @@ services:
       NACOS_DISCOVERY_IP: "{{hostvars[inventory_hostname]['ansible_ssh_host']}}"
     ports:
       - "{{monitor_port}}:{{monitor_port}}"
-      - "{{monitor_port | int + 55}}:9555" # Debug端口，默认按照服务端口偏移+55
     volumes:
       - ./logs:/root/logs

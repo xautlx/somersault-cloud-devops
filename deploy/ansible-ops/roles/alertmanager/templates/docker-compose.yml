@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   alertmanager:
-    image: "{{docker_image_repo | default('')}}prom/alertmanager:{{alertmanager_version}}"
+    image: "prom/alertmanager:{{alertmanager_version}}"
     container_name: prom_alertmanager
     restart: always
     hostname: alertmanager
@@ -21,7 +21,7 @@ services:
       - dingtalk:dingtalk
 
   dingtalk:
-    image: "{{docker_image_repo | default('')}}timonwong/prometheus-webhook-dingtalk:v2.1.0"
+    image: "timonwong/prometheus-webhook-dingtalk:{{webhook_dingtalk_version}}"
     container_name: prom_dingtalk
     restart: always
     hostname: dingtalk

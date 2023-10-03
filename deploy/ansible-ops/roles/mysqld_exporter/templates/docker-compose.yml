@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   mysqld-exporter:
-    image: "{{docker_image_repo | default('')}}prom/mysqld-exporter:{{mysqld_exporter_version}}"
+    image: "prom/mysqld-exporter:{{mysqld_exporter_version}}"
     container_name: mysqld-exporter
     restart: always
     ports:

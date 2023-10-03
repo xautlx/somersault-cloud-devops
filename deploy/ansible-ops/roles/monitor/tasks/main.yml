@@ -28,7 +28,7 @@
     chdir: "{{monitor_data_dir}}"
   failed_when: false
 
-- name: docker compose up -d --pull always
+- name: docker compose up -d
   shell:
-    cmd: "docker compose up -d --pull always"
+    cmd: "docker compose up -d"
     chdir: "{{monitor_data_dir}}"

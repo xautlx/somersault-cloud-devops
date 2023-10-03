@@ -37,8 +37,11 @@
 
 - name: init setup grafana admin password
   shell:
-    cmd: "docker exec -ti grafana grafana-cli admin reset-admin-password {{grafana_admin_password}}"
+    cmd: "{{item}}"
     chdir: "{{grafana_dir}}"
+  loop:
+    - "sleep 10s"
+    - "docker exec -ti grafana grafana-cli admin reset-admin-password {{grafana_admin_password}}"
   when:
     - grafana_inited_result.stat.exists == False
 
