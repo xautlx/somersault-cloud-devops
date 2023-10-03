@@ -1,8 +1,13 @@
 ---
 - hosts: all
   become: yes
-  gather_facts: false
+  gather_facts: true
   tasks:
+    - name: print os info
+      debug:
+        # ansible_architecture: x86_64, aarch64
+        # ansible_os_family: RedHat, UOS Server 20
+        msg: "ansible_architecture: {{ansible_architecture}}, ansible_os_family: {{ansible_os_family}}"
     - name: print hosts list
       delegate_to: localhost
       debug:

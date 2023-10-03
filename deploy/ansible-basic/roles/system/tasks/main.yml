@@ -1,7 +1,8 @@
 ---
 - name: set_fact
   set_fact:
-    install_tmp_dir: /tmp/ansible/tool_install
+    install_cache_dir: /data/cache/tool_install
+    install_tmp_dir: /data/tmp/tool_install
 
 - name: create data dir
   file:
@@ -10,12 +11,14 @@
     state: directory
   loop:
     - "{{install_tmp_dir}}"
+    - "{{install_cache_dir}}"
 
 - name: stop firewalld
   service:
     name: firewalld
     state: stopped
     enabled: no
+  failed_when: false
 
 - name: stop selinux
   lineinfile:
@@ -29,21 +32,29 @@
     regexp: '#UseDNS yes'
     line: "UseDNS no"
 
-- name: unarchive rpm-packages
+- name: copy cache tool-rpm-packages-{{ansible_architecture}}.tar
+  copy:
+    src: '{{role_path}}/files/tool-rpm-packages-{{ansible_architecture}}.tar'
+    dest: '{{install_cache_dir}}'
+
+- name: "unarchive tool-rpm-packages-{{ansible_architecture}}.tar"
   unarchive:
-    src: '{{role_path}}/files/tool-rpm-packages.tar'
+    remote_src: true
+    src: '{{install_cache_dir}}/tool-rpm-packages-{{ansible_architecture}}.tar'
     dest: '{{install_tmp_dir}}'
 
-- name: rpm install rpm-packages
-  shell:
-    cmd: "rpm -Uvh *.rpm --nodeps --force "
-    chdir: "{{install_tmp_dir}}"
-  failed_when: false
+- name: list rpm files
+  find:
+    paths: "{{ install_tmp_dir }}"
+    patterns: "*.rpm"
+  register: rpm_file_result
+  changed_when: False
 
-#- name: clear rpm-packages
-#  shell:
-#    cmd: "rm -f *.rpm"
-#    chdir: "{{install_tmp_dir}}"
+- name: rpm install docker-ce rpm-packages
+  shell:
+    cmd: "rpm -Uvh {{item.path}} --nodeps"
+  ignore_errors: true
+  with_items: "{{rpm_file_result.files}}"
 
 - name: setup hostname
   shell:
@@ -59,4 +70,9 @@
     regexp: '{{ item }}$'
     line: '{{ hostvars[item].ansible_ssh_host }} {{ item }}'
   with_items: "{{ groups['all'] }}"
+
+- name: rm {{install_tmp_dir}}
+  shell:
+    cmd: "rm -fr {{install_tmp_dir}}"
+  when: "'/data/tmp/' in install_tmp_dir"
 

@@ -2,9 +2,7 @@
 - hosts: all
   become: yes
   roles:
-    - role: timezone
-      vars:
-        - timezone: Asia/Shanghai
     - role: system
       vars:
         - force_update_hostname: true
+
