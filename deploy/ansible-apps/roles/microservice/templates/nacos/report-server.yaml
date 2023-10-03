@@ -14,14 +14,14 @@ spring:
           name: somersault_cloud_report
           url: jdbc:mysql://{{mysql_replication_master_addr}}/${spring.datasource.dynamic.datasource.master.name}?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8&nullCatalogMeansCurrent=true
           driver-class-name: com.mysql.cj.jdbc.Driver
-          username: somersault_cloud
-          password: {{mysql_passwd}}
+          username: "{{mysql_user}}"
+          password: "{{mysql_passwd}}"
         slave:
           name: somersault_cloud_report
           url: jdbc:mysql://{{mysql_replication_slave_addr}}/${spring.datasource.dynamic.datasource.slave.name}?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8&nullCatalogMeansCurrent=true
           driver-class-name: com.mysql.cj.jdbc.Driver
-          username: somersault_cloud
-          password: {{mysql_passwd}}
+          username: "{{mysql_user}}"
+          password: "{{mysql_passwd}}"
 
   # Redis 配置
   redis:
